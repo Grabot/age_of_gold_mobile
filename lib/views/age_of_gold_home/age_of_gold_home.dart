@@ -74,18 +74,12 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
     return Container(
       width: 120,
       height: 120,
-      decoration: const BoxDecoration(
-        shape: BoxShape.circle,
-        color: Color(0xffEEF1F3),
-      ),
       child: authStore.me.user.avatar != null
-          ? ClipOval(
-        child: Image.memory(
+          ? Image.memory(
           authStore.me.user.avatar!,
           width: 120,
           height: 120,
           fit: BoxFit.cover,
-        ),
       )
           : Center(
         child: Text(
@@ -115,8 +109,8 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
           } else if (value == 'change_username') {
             _showChangeUsernameDialog(context);
           } else if (value == 'change_avatar') {
-            _showChangeAvatarDialog(context).then((_) {
-              if (mounted) {
+            _showChangeAvatarDialog(context).then((avatarChanged) {
+              if (mounted && avatarChanged) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Avatar updated successfully!')),
                 );
@@ -270,8 +264,8 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
     );
   }
 
-  Future<void> _showChangeAvatarDialog(BuildContext context) async {
-    await showDialog<bool>(
+  Future<bool> _showChangeAvatarDialog(BuildContext context) async {
+    final avatarChanged = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return ChangeAvatarDialog(
@@ -290,6 +284,7 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
               await SecureStorage().setAvatarVersion(avatarVersion + 1);
             } catch (e) {
               showToastMessage("Error saving avatar: $e");
+              return false;
             } finally {
               if (mounted) {
                 setState(() {
@@ -297,10 +292,12 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
                 });
               }
             }
+            return true;
           },
         );
       },
     );
-    return;
+
+    return avatarChanged ?? false;
   }
 }

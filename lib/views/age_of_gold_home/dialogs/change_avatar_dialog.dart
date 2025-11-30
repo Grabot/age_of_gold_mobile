@@ -134,7 +134,9 @@ class _ChangeAvatarDialogState extends State<ChangeAvatarDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: isLoadingChangeAvatar ? null : () => Navigator.pop(context),
+                    onPressed: isLoadingChangeAvatar
+                        ? null
+                        : () => Navigator.pop(context, false), // Cancel: return false
                     child: const Text('Cancel'),
                   ),
                   TextButton(
@@ -146,8 +148,8 @@ class _ChangeAvatarDialogState extends State<ChangeAvatarDialog> {
                         if (imageCrop.lengthInBytes > maxSize) {
                           finalImage = await _compressImage(imageCrop);
                         }
-                        widget.onSave(finalImage, defaultAvatar);
-                        Navigator.pop(context);
+                        await widget.onSave(finalImage, defaultAvatar);
+                        Navigator.pop(context, true); // Success: return true
                       } catch (e) {
                         showToastMessage("Error saving avatar: $e");
                       }
@@ -186,7 +188,9 @@ class _ChangeAvatarDialogState extends State<ChangeAvatarDialog> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             TextButton(
-              onPressed: isLoadingChangeAvatar ? null : () => Navigator.pop(context),
+              onPressed: isLoadingChangeAvatar
+                  ? null
+                  : () => Navigator.pop(context, false),
               child: const Text('Cancel'),
             ),
             TextButton(
@@ -198,8 +202,8 @@ class _ChangeAvatarDialogState extends State<ChangeAvatarDialog> {
                   if (imageCrop.lengthInBytes > maxSize) {
                     finalImage = await _compressImage(imageCrop);
                   }
-                  widget.onSave(finalImage, defaultAvatar);
-                  Navigator.pop(context);
+                  await widget.onSave(finalImage, defaultAvatar);
+                  Navigator.pop(context, true);
                 } catch (e) {
                   showToastMessage("Error saving avatar: $e");
                 }
