@@ -4,6 +4,7 @@ class CustomInputField extends StatefulWidget {
   final String labelText;
   final String hintText;
   final String? Function(String?) validator;
+  final TextEditingController? controller;
   final bool suffixIcon;
   final bool? isDense;
   final bool obscureText;
@@ -13,6 +14,7 @@ class CustomInputField extends StatefulWidget {
     required this.labelText,
     required this.hintText,
     required this.validator,
+    required this.controller,
     this.suffixIcon = false,
     this.isDense,
     this.obscureText = false
@@ -23,7 +25,6 @@ class CustomInputField extends StatefulWidget {
 }
 
 class _CustomInputFieldState extends State<CustomInputField> {
-  //
   bool _obscureText = true;
 
   @override
@@ -39,6 +40,7 @@ class _CustomInputFieldState extends State<CustomInputField> {
             child: Text(widget.labelText, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
           ),
           TextFormField(
+            controller: widget.controller,
             obscureText: (widget.obscureText && _obscureText),
             decoration: InputDecoration(
               isDense: (widget.isDense != null) ? widget.isDense : false,
@@ -58,7 +60,6 @@ class _CustomInputFieldState extends State<CustomInputField> {
                   maxHeight: 33
               ): null,
             ),
-            autovalidateMode: AutovalidateMode.onUserInteraction,
             validator: widget.validator,
           ),
         ],

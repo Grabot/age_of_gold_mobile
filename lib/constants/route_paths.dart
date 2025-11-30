@@ -1,2 +1,2 @@
 const String AgeOfGoldHomeRoute = 'Home';
-const String LoginRoute = 'SignIn';
+const String SignInRoute = 'SignIn';

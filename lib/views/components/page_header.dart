@@ -8,7 +8,7 @@ class PageHeader extends StatelessWidget {
     Size size = MediaQuery.of(context).size;
     return SizedBox(
       width: double.infinity,
-      height: size.height * 0.3,
+      height: size.height * 0.25,
       child: Image.asset('assets/images/gold_placeholder.png'),
     );
   }

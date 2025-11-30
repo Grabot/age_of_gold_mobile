@@ -55,6 +55,7 @@ unlinked_spec.ds
 **/android/local.properties
 **/android/**/GeneratedPluginRegistrant.java
 **/android/key.properties
+**/android/secrets.properties
 *.jks
 
 # iOS/XCode related
@@ -119,3 +120,4 @@ app.*.symbols
 !/dev/ci/**/Gemfile.lock
 
 base_url.dart
+*.env

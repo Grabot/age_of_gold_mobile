@@ -1,206 +1,271 @@
-import 'dart:io';
+import 'dart:async';
 import 'package:dio/dio.dart';
-import 'package:jwt_decode/jwt_decode.dart';
 import 'package:age_of_gold_mobile/constants/route_paths.dart' as routes;
+import 'package:age_of_gold_mobile/utils/navigation_service.dart';
+import 'package:age_of_gold_mobile/utils/secure_storage.dart';
+import 'package:age_of_gold_mobile/utils/utils.dart';
+import 'package:age_of_gold_mobile/models/services/login_response.dart';
 
-import '../../constants/base_url.dart';
-import '../../utils/navigation_service.dart';
-import '../../utils/secure_storage.dart';
-import '../../utils/settings.dart';
-import '../../utils/utils.dart';
-import '../models/login_response.dart';
+import '../../utils/auth_store.dart';
+import 'auth_login.dart';
 
 
 class AppInterceptors extends Interceptor {
   final Dio dio;
+  final SecureStorage secureStorage;
+  final NavigationService navigationService;
+  bool _isRefreshing = false;
+  final List<Function> _requestQueue = [];
 
-  Settings settings = Settings();
-  SecureStorage secureStorage = SecureStorage();
-
-  final NavigationService _navigationService = locator<NavigationService>();
-
-  AppInterceptors(this.dio);
+  AppInterceptors(this.dio)
+      : secureStorage = SecureStorage(),
+        navigationService = locator<NavigationService>();
 
   @override
-  void onRequest(
-      RequestOptions options, RequestInterceptorHandler handler) async {
+  Future<void> onRequest(RequestOptions options,
+      RequestInterceptorHandler handler,) async {
+    try {
+      String? accessToken = await secureStorage.getAccessToken();
+      final expiration = await secureStorage.getAccessTokenExpiration();
 
-    int? expiration = await secureStorage.getAccessTokenExpiration();
-    String? accessToken = await secureStorage.getAccessToken();
-    if (accessToken == null || accessToken == "" || expiration == null) {
-      DioException dioError = DioException(requestOptions: options,
-          type: DioExceptionType.cancel,
-          error: "User not authorized");
-      showToastMessage("There was an issue with authorization, please log in again");
-      _navigationService.navigateTo(routes.LoginRoute);
-      return handler.reject(dioError, true);
-    } else {
-      int current = (DateTime
+      if (accessToken == null || expiration == null) {
+        throw DioException(
+          requestOptions: options,
+          error: 'user not authorized',
+        );
+      }
+
+      final currentTime = DateTime
           .now()
-          .millisecondsSinceEpoch / 1000).round();
-
-      if ((expiration - current) < 60) {
-        // We see that the access token is almost expired. We should refresh it.
-        String? refreshToken = await secureStorage.getRefreshToken();
-
-        if (refreshToken == null || refreshToken == "") {
-          // We don't have a refresh token. We should log the user out.
-          DioException dioError = DioException(requestOptions: options,
-              type: DioExceptionType.cancel,
-              error: "User not authorized");
-          showToastMessage("There was an issue with authorization, please log in again");
-          _navigationService.navigateTo(routes.LoginRoute);
-          return handler.reject(dioError, true);
-        } else {
-          String endPoint = "refresh";
-          var responseRefresh = await Dio(
-              BaseOptions(
-                baseUrl: apiUrl,
-                receiveTimeout: const Duration(seconds: 600),
-                connectTimeout: const Duration(seconds: 600),
-                sendTimeout: const Duration(seconds: 600),
-              )
-          ).post(endPoint,
-              options: Options(headers: {
-                HttpHeaders.contentTypeHeader: "application/json",
-              }),
-              data: {
-                "access_token": accessToken,
-                "refresh_token": refreshToken
-              }
-          ).catchError((error, stackTrace) {
-            return Response(requestOptions: RequestOptions(path: ''), data: {
-              "result": false,
-              "message": "There was an issue with authorization, please log in again"
-            });
-          });
-
-          LoginResponse loginRefresh = LoginResponse.fromJson(responseRefresh.data);
-          if (loginRefresh.getResult()) {
-            String? newAccessToken = loginRefresh.getAccessToken();
-            if (newAccessToken != null) {
-              await secureStorage.setAccessToken(newAccessToken);
-              await secureStorage.setAccessTokenExpiration(Jwt.parseJwt(newAccessToken)['exp']);
-              accessToken = newAccessToken;
+          .millisecondsSinceEpoch ~/ 1000;
+      if (expiration - currentTime < 30) {
+        if (!_isRefreshing) {
+          try {
+            _isRefreshing = true;
+            final refreshToken = await secureStorage.getRefreshToken();
+            if (refreshToken == null) {
+              throw Exception("refresh token is null");
             }
-
-            String? newRefreshToken = loginRefresh.getRefreshToken();
-            if (newRefreshToken != null) {
-              await secureStorage.setRefreshToken(newRefreshToken);
-              await secureStorage.setRefreshTokenExpiration(Jwt.parseJwt(newRefreshToken)['exp']);
+            LoginResponse? loginResponse = await AuthLogin().refreshToken(
+                accessToken, refreshToken);
+            await AuthStore().successfulLogin(loginResponse);
+            accessToken = await secureStorage.getAccessToken();
+            for (var request in _requestQueue) {
+              request();
             }
-          } else {
-            showToastMessage("There was an issue with authorization, please log in again");
-            _navigationService.navigateTo(routes.LoginRoute);
-            DioException dioError = DioException(requestOptions: options,
-                type: DioExceptionType.cancel,
-                error: "User not authorized");
-            return handler.reject(dioError, true);
+            _requestQueue.clear();
+          } catch (e) {
+            throw DioException(
+              requestOptions: options,
+              error: 'Token could not be refreshed',
+            );
+          } finally {
+            _isRefreshing = false;
           }
+        } else {
+          // Add the request to the queue
+          _requestQueue.add(() async {
+            options.headers['Authorization'] = 'Bearer ${await secureStorage.getAccessToken()}';
+            final response = await dio.request(
+              options.path,
+              data: options.data,
+              queryParameters: options.queryParameters,
+              options: Options(
+                method: options.method,
+                headers: options.headers,
+              ),
+            );
+            handler.resolve(response);
+          });
+          return;
         }
       }
-      options.headers['Authorization'] = 'Bearer: $accessToken';
+
+      options.headers['Authorization'] = 'Bearer $accessToken';
       return handler.next(options);
+    } catch (e) {
+      return handler.reject(
+        DioException(requestOptions: options, error: 'Failed to attach token: $e'),
+      );
     }
   }
 
   @override
-  void onError(DioException err, ErrorInterceptorHandler handler) {
+  void onError(DioException err, ErrorInterceptorHandler handler) async {
+    if (err.response?.statusCode == 401) {
+      if (!_isRefreshing) {
+        try {
+          _isRefreshing = true;
+          final accessToken = await secureStorage.getAccessToken();
+          final refreshToken = await secureStorage.getRefreshToken();
+          if (refreshToken != null && accessToken != null) {
+            try {
+              LoginResponse? loginResponse = await AuthLogin().refreshToken(
+                  accessToken, refreshToken);
+              await AuthStore().successfulLogin(loginResponse);
+              // Retry the original request with the new token
+              final options = err.requestOptions;
+              options.headers['Authorization'] = 'Bearer ${await secureStorage.getAccessToken()}';
+              final response = await dio.request(
+                options.path,
+                data: options.data,
+                queryParameters: options.queryParameters,
+                options: Options(
+                  method: options.method,
+                  headers: options.headers,
+                ),
+              );
+              return handler.resolve(response);
+            } catch (e) {
+              // Refresh token failed. Continue, which will clear the tokens and navigate to login
+            }
+          }
+          // If refresh fails, navigate to login
+          await secureStorage.clearTokens();
+          showToastMessage("Session expired. Please log in again.");
+          navigationService.navigateTo(routes.SignInRoute);
+          return;
+        } finally {
+          _isRefreshing = false;
+        }
+      } else {
+        // If already refreshing, reject and let the queue handle it
+        return handler.reject(err);
+      }
+    }
+
     switch (err.type) {
-      case DioExceptionType.connectionTimeout:
-      case DioExceptionType.sendTimeout:
-      case DioExceptionType.receiveTimeout:
-        throw DeadlineExceededException(err.requestOptions);
       case DioExceptionType.badResponse:
-        if (err.response == null) {
-          throw BadRequestException(err.requestOptions);
+        String? errorMessage;
+        if (err.response?.data is Map) {
+          if (err.response!.data['detail'] != null) {
+            errorMessage = err.response!.data['detail'].toString();
+          }
         }
         switch (err.response?.statusCode) {
           case 400:
-            throw BadRequestException(err.requestOptions);
-          case 401:
-            throw UnauthorizedException(err.requestOptions);
+            return handler.next(BadRequestException(
+                err.requestOptions,
+                errorMessage ?? 'Bad request'
+            ));
           case 404:
-            throw NotFoundException(err.requestOptions);
+            return handler.next(NotFoundException(
+                err.requestOptions,
+                errorMessage ?? 'Resource not found'
+            ));
           case 409:
-            throw ConflictException(err.requestOptions);
+            return handler.next(ConflictException(
+                err.requestOptions,
+                errorMessage ?? 'Conflict occurred'
+            ));
           case 500:
-            throw InternalServerErrorException(err.requestOptions);
+            return handler.next(InternalServerErrorException(
+                err.requestOptions,
+                errorMessage ?? 'Internal server error'
+            ));
+          default:
+            return handler.next(UnknownException(
+                err.requestOptions,
+                errorMessage ?? 'An unknown error occurred'
+            ));
         }
-        break;
-      case DioExceptionType.cancel:
-        throw BadRequestException(err.requestOptions);
-      case DioExceptionType.unknown:
-        throw NoInternetConnectionException(err.requestOptions);
-      case DioExceptionType.badCertificate:
-        throw BadRequestException(err.requestOptions);
+      case DioExceptionType.connectionTimeout:
+        return handler.next(DeadlineExceededException(err.requestOptions));
+      case DioExceptionType.sendTimeout:
+      return handler.next(DeadlineExceededException(err.requestOptions));
+      case DioExceptionType.receiveTimeout:
+        return handler.next(DeadlineExceededException(err.requestOptions));
       case DioExceptionType.connectionError:
-        throw NoInternetConnectionException(err.requestOptions);
+        return handler.next(NoInternetConnectionException(err.requestOptions));
+      case DioExceptionType.unknown:
+        return handler.next(NoInternetConnectionException(err.requestOptions));
+      default:
+        return handler.next(UnknownException(err.requestOptions));
     }
-
-    return handler.next(err);
   }
 }
 
-class BadRequestException extends DioException {
-  BadRequestException(RequestOptions r) : super(requestOptions: r);
+
+class AppException extends DioException {
+  AppException({
+    required super.requestOptions,
+    String super.message = "An error occurred",
+    super.type = DioExceptionType.badResponse,
+    dynamic super.error,
+  });
 
   @override
-  String toString() {
-    return 'Invalid request';
-  }
+  String toString() => message ?? 'An error occurred';
 }
 
-class InternalServerErrorException extends DioException {
-  InternalServerErrorException(RequestOptions r) : super(requestOptions: r);
-
-  @override
-  String toString() {
-    return 'Unknown error occurred, please try again later.';
-  }
+class UnauthorizedException extends AppException {
+  UnauthorizedException(RequestOptions r, [String? message])
+      : super(
+    requestOptions: r,
+    message: message ?? 'Unauthorized',
+    type: DioExceptionType.badResponse,
+  );
 }
 
-class ConflictException extends DioException {
-  ConflictException(RequestOptions r) : super(requestOptions: r);
-
-  @override
-  String toString() {
-    return 'Conflict occurred';
-  }
+class BadRequestException extends AppException {
+  BadRequestException(RequestOptions r, [String? message])
+      : super(
+    requestOptions: r,
+    message: message ?? 'Invalid request',
+    type: DioExceptionType.badResponse,
+  );
 }
 
-class UnauthorizedException extends DioException {
-  UnauthorizedException(RequestOptions r) : super(requestOptions: r);
-
-  @override
-  String toString() {
-    return 'Access denied';
-  }
+class NotFoundException extends AppException {
+  NotFoundException(RequestOptions r, [String? message])
+      : super(
+    requestOptions: r,
+    message: message ?? 'The requested information could not be found',
+    type: DioExceptionType.badResponse,
+  );
 }
 
-class NotFoundException extends DioException {
-  NotFoundException(RequestOptions r) : super(requestOptions: r);
-
-  @override
-  String toString() {
-    return 'The requested information could not be found';
-  }
+class ConflictException extends AppException {
+  ConflictException(RequestOptions r, [String? message])
+      : super(
+    requestOptions: r,
+    message: message ?? 'Conflict occurred',
+    type: DioExceptionType.badResponse,
+  );
 }
 
-class NoInternetConnectionException extends DioException {
-  NoInternetConnectionException(RequestOptions r) : super(requestOptions: r);
-
-  @override
-  String toString() {
-    return 'No internet connection detected, please try again.';
-  }
+class InternalServerErrorException extends AppException {
+  InternalServerErrorException(RequestOptions r, [String? message])
+      : super(
+    requestOptions: r,
+    message: message ?? 'Unknown error occurred, please try again later.',
+    type: DioExceptionType.badResponse,
+  );
 }
 
-class DeadlineExceededException extends DioException {
-  DeadlineExceededException(RequestOptions r) : super(requestOptions: r);
+class NoInternetConnectionException extends AppException {
+  NoInternetConnectionException(RequestOptions r, [String? message])
+      : super(
+    requestOptions: r,
+    message: message ?? 'No internet connection detected, please try again.',
+    type: DioExceptionType.connectionError,
+  );
+}
 
-  @override
-  String toString() {
-    return 'The connection has timed out, please try again.';
-  }
+class DeadlineExceededException extends AppException {
+  DeadlineExceededException(RequestOptions r, [String? message])
+      : super(
+    requestOptions: r,
+    message: message ?? 'The connection has timed out, please try again.',
+    type: DioExceptionType.connectionTimeout,
+  );
+}
+
+class UnknownException extends AppException {
+  UnknownException(RequestOptions r, [String? message])
+      : super(
+    requestOptions: r,
+    message: message ?? 'An unknown error occurred.',
+    type: DioExceptionType.unknown,
+  );
 }

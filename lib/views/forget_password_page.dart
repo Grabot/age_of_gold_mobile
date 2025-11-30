@@ -4,7 +4,7 @@ import 'components/custom_form_button.dart';
 import 'components/custom_input_field.dart';
 import 'components/page_header.dart';
 import 'components/page_heading.dart';
-import 'login_page.dart';
+import 'sign_in_page.dart';
 
 class ForgetPasswordPage extends StatefulWidget {
   const ForgetPasswordPage({super.key});
@@ -16,6 +16,7 @@ class ForgetPasswordPage extends StatefulWidget {
 class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
 
   final _forgetPasswordFormKey = GlobalKey<FormState>();
+  TextEditingController emailController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -38,17 +39,18 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
                       children: [
                         const PageHeading(title: 'Forgot password',),
                         CustomInputField(
-                            labelText: 'Email',
-                            hintText: 'Your email id',
-                            validator: (textValue) {
-                              if(textValue == null || textValue.isEmpty) {
-                                return 'Email is required!';
-                              }
-                              if(!EmailValidator.validate(textValue)) {
-                                return 'Please enter a valid email';
-                              }
-                              return null;
+                          labelText: 'Email',
+                          hintText: 'Your email id',
+                          validator: (textValue) {
+                            if(textValue == null || textValue.isEmpty) {
+                              return 'Email is required!';
                             }
+                            if(!EmailValidator.validate(textValue)) {
+                              return 'Please enter a valid email';
+                            }
+                            return null;
+                          },
+                          controller: emailController,
                         ),
                         const SizedBox(height: 18,),
                         CustomFormButton(innerText: 'Submit', onPressed: _handleForgetPassword,),
@@ -60,7 +62,12 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
                             children: [
                               GestureDetector(
                                 onTap: () => {
-                                  Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginPage()))
+                                  Navigator.pushReplacement(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) => const SignInPage()
+                                      )
+                                  )
                                 },
                                 child: const Text('Back to login', style: TextStyle(fontSize: 15, color: Color(0xff748288), fontWeight: FontWeight.bold),),
                               ),

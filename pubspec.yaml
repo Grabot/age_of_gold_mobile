@@ -39,21 +39,28 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
-#  shared_preferences: ^2.5.3
 #  awesome_notifications_core: ^0.10.1
 #  awesome_notifications: ^0.10.1
 #  awesome_notifications_fcm: ^0.10.1
 #  firebase_core: ^3.12.0
 #  firebase_analytics: ^11.6.0
 #  firebase_crashlytics: ^4.3.3
-#  sqflite: ^2.4.2
-#  oktoast: ^3.4.0
   dio: ^5.8.0+1
   email_validator: ^2.0.1
   jwt_decode: ^0.3.1
   flutter_secure_storage: ^9.2.4
   get_it: ^8.0.3
   oktoast: ^3.4.0
+  socket_io_client: ^3.1.2
+  shared_preferences: ^2.5.3
+  url_launcher: ^6.3.1
+  flutter_dotenv: ^6.0.0
+  sqflite: ^2.4.2
+  path_provider: ^2.1.1
+  image_picker: ^1.2.1
+  image: ^4.5.4
+  camerawesome: ^2.5.0
+  flutter_image_compress: ^2.4.0
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -75,7 +82,13 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
+    - .env
     - assets/images/gold_placeholder.png
+    - assets/images/Zwaar_Logo.png
+    - assets/images/oauth2/apple_logo.png
+    - assets/images/oauth2/github_logo.png
+    - assets/images/oauth2/google_logo.png
+    - assets/images/oauth2/reddit_logo.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
