@@ -9,7 +9,6 @@ import 'package:age_of_gold_mobile/models/services/login_response.dart';
 import '../../utils/auth_store.dart';
 import 'auth_login.dart';
 
-
 class AppInterceptors extends Interceptor {
   final Dio dio;
   final SecureStorage secureStorage;
@@ -18,12 +17,14 @@ class AppInterceptors extends Interceptor {
   final List<Function> _requestQueue = [];
 
   AppInterceptors(this.dio)
-      : secureStorage = SecureStorage(),
-        navigationService = locator<NavigationService>();
+    : secureStorage = SecureStorage(),
+      navigationService = locator<NavigationService>();
 
   @override
-  Future<void> onRequest(RequestOptions options,
-      RequestInterceptorHandler handler,) async {
+  Future<void> onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
     try {
       String? accessToken = await secureStorage.getAccessToken();
       final expiration = await secureStorage.getAccessTokenExpiration();
@@ -35,9 +36,7 @@ class AppInterceptors extends Interceptor {
         );
       }
 
-      final currentTime = DateTime
-          .now()
-          .millisecondsSinceEpoch ~/ 1000;
+      final currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
       if (expiration - currentTime < 30) {
         if (!_isRefreshing) {
           try {
@@ -47,7 +46,9 @@ class AppInterceptors extends Interceptor {
               throw Exception("refresh token is null");
             }
             LoginResponse? loginResponse = await AuthLogin().refreshToken(
-                accessToken, refreshToken);
+              accessToken,
+              refreshToken,
+            );
             await AuthStore().successfulLogin(loginResponse);
             accessToken = await secureStorage.getAccessToken();
             for (var request in _requestQueue) {
@@ -65,7 +66,8 @@ class AppInterceptors extends Interceptor {
         } else {
           // Add the request to the queue
           _requestQueue.add(() async {
-            options.headers['Authorization'] = 'Bearer ${await secureStorage.getAccessToken()}';
+            options.headers['Authorization'] =
+                'Bearer ${await secureStorage.getAccessToken()}';
             final response = await dio.request(
               options.path,
               data: options.data,
@@ -85,7 +87,10 @@ class AppInterceptors extends Interceptor {
       return handler.next(options);
     } catch (e) {
       return handler.reject(
-        DioException(requestOptions: options, error: 'Failed to attach token: $e'),
+        DioException(
+          requestOptions: options,
+          error: 'Failed to attach token: $e',
+        ),
       );
     }
   }
@@ -101,11 +106,14 @@ class AppInterceptors extends Interceptor {
           if (refreshToken != null && accessToken != null) {
             try {
               LoginResponse? loginResponse = await AuthLogin().refreshToken(
-                  accessToken, refreshToken);
+                accessToken,
+                refreshToken,
+              );
               await AuthStore().successfulLogin(loginResponse);
               // Retry the original request with the new token
               final options = err.requestOptions;
-              options.headers['Authorization'] = 'Bearer ${await secureStorage.getAccessToken()}';
+              options.headers['Authorization'] =
+                  'Bearer ${await secureStorage.getAccessToken()}';
               final response = await dio.request(
                 options.path,
                 data: options.data,
@@ -123,7 +131,7 @@ class AppInterceptors extends Interceptor {
           // If refresh fails, navigate to login
           await secureStorage.clearTokens();
           showToastMessage("Session expired. Please log in again.");
-          navigationService.navigateTo(routes.SignInRoute);
+          navigationService.navigateTo(routes.signInRoute);
           return;
         } finally {
           _isRefreshing = false;
@@ -144,35 +152,45 @@ class AppInterceptors extends Interceptor {
         }
         switch (err.response?.statusCode) {
           case 400:
-            return handler.next(BadRequestException(
+            return handler.next(
+              BadRequestException(
                 err.requestOptions,
-                errorMessage ?? 'Bad request'
-            ));
+                errorMessage ?? 'Bad request',
+              ),
+            );
           case 404:
-            return handler.next(NotFoundException(
+            return handler.next(
+              NotFoundException(
                 err.requestOptions,
-                errorMessage ?? 'Resource not found'
-            ));
+                errorMessage ?? 'Resource not found',
+              ),
+            );
           case 409:
-            return handler.next(ConflictException(
+            return handler.next(
+              ConflictException(
                 err.requestOptions,
-                errorMessage ?? 'Conflict occurred'
-            ));
+                errorMessage ?? 'Conflict occurred',
+              ),
+            );
           case 500:
-            return handler.next(InternalServerErrorException(
+            return handler.next(
+              InternalServerErrorException(
                 err.requestOptions,
-                errorMessage ?? 'Internal server error'
-            ));
+                errorMessage ?? 'Internal server error',
+              ),
+            );
           default:
-            return handler.next(UnknownException(
+            return handler.next(
+              UnknownException(
                 err.requestOptions,
-                errorMessage ?? 'An unknown error occurred'
-            ));
+                errorMessage ?? 'An unknown error occurred',
+              ),
+            );
         }
       case DioExceptionType.connectionTimeout:
         return handler.next(DeadlineExceededException(err.requestOptions));
       case DioExceptionType.sendTimeout:
-      return handler.next(DeadlineExceededException(err.requestOptions));
+        return handler.next(DeadlineExceededException(err.requestOptions));
       case DioExceptionType.receiveTimeout:
         return handler.next(DeadlineExceededException(err.requestOptions));
       case DioExceptionType.connectionError:
@@ -184,7 +202,6 @@ class AppInterceptors extends Interceptor {
     }
   }
 }
-
 
 class AppException extends DioException {
   AppException({
@@ -200,72 +217,73 @@ class AppException extends DioException {
 
 class UnauthorizedException extends AppException {
   UnauthorizedException(RequestOptions r, [String? message])
-      : super(
-    requestOptions: r,
-    message: message ?? 'Unauthorized',
-    type: DioExceptionType.badResponse,
-  );
+    : super(
+        requestOptions: r,
+        message: message ?? 'Unauthorized',
+        type: DioExceptionType.badResponse,
+      );
 }
 
 class BadRequestException extends AppException {
   BadRequestException(RequestOptions r, [String? message])
-      : super(
-    requestOptions: r,
-    message: message ?? 'Invalid request',
-    type: DioExceptionType.badResponse,
-  );
+    : super(
+        requestOptions: r,
+        message: message ?? 'Invalid request',
+        type: DioExceptionType.badResponse,
+      );
 }
 
 class NotFoundException extends AppException {
   NotFoundException(RequestOptions r, [String? message])
-      : super(
-    requestOptions: r,
-    message: message ?? 'The requested information could not be found',
-    type: DioExceptionType.badResponse,
-  );
+    : super(
+        requestOptions: r,
+        message: message ?? 'The requested information could not be found',
+        type: DioExceptionType.badResponse,
+      );
 }
 
 class ConflictException extends AppException {
   ConflictException(RequestOptions r, [String? message])
-      : super(
-    requestOptions: r,
-    message: message ?? 'Conflict occurred',
-    type: DioExceptionType.badResponse,
-  );
+    : super(
+        requestOptions: r,
+        message: message ?? 'Conflict occurred',
+        type: DioExceptionType.badResponse,
+      );
 }
 
 class InternalServerErrorException extends AppException {
   InternalServerErrorException(RequestOptions r, [String? message])
-      : super(
-    requestOptions: r,
-    message: message ?? 'Unknown error occurred, please try again later.',
-    type: DioExceptionType.badResponse,
-  );
+    : super(
+        requestOptions: r,
+        message: message ?? 'Unknown error occurred, please try again later.',
+        type: DioExceptionType.badResponse,
+      );
 }
 
 class NoInternetConnectionException extends AppException {
   NoInternetConnectionException(RequestOptions r, [String? message])
-      : super(
-    requestOptions: r,
-    message: message ?? 'No internet connection detected, please try again.',
-    type: DioExceptionType.connectionError,
-  );
+    : super(
+        requestOptions: r,
+        message:
+            message ?? 'No internet connection detected, please try again.',
+        type: DioExceptionType.connectionError,
+      );
 }
 
 class DeadlineExceededException extends AppException {
   DeadlineExceededException(RequestOptions r, [String? message])
-      : super(
-    requestOptions: r,
-    message: message ?? 'The connection has timed out, please try again.',
-    type: DioExceptionType.connectionTimeout,
-  );
+    : super(
+        requestOptions: r,
+        message: message ?? 'The connection has timed out, please try again.',
+        type: DioExceptionType.connectionTimeout,
+      );
 }
 
 class UnknownException extends AppException {
   UnknownException(RequestOptions r, [String? message])
-      : super(
-    requestOptions: r,
-    message: message ?? 'An unknown error occurred.',
-    type: DioExceptionType.unknown,
-  );
+    : super(
+        requestOptions: r,
+        message: message ?? 'An unknown error occurred.',
+        type: DioExceptionType.unknown,
+      );
 }

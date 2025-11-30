@@ -17,7 +17,7 @@ class CustomInputField extends StatefulWidget {
     required this.controller,
     this.suffixIcon = false,
     this.isDense,
-    this.obscureText = false
+    this.obscureText = false,
   });
 
   @override
@@ -37,7 +37,10 @@ class _CustomInputFieldState extends State<CustomInputField> {
         children: [
           Align(
             alignment: Alignment.centerLeft,
-            child: Text(widget.labelText, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),),
+            child: Text(
+              widget.labelText,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
           ),
           TextFormField(
             controller: widget.controller,
@@ -45,20 +48,26 @@ class _CustomInputFieldState extends State<CustomInputField> {
             decoration: InputDecoration(
               isDense: (widget.isDense != null) ? widget.isDense : false,
               hintText: widget.hintText,
-              suffixIcon: widget.suffixIcon ? IconButton(
-                icon: Icon(
-                  _obscureText ? Icons.remove_red_eye : Icons.visibility_off_outlined,
-                  color: Colors.black54,
-                ),
-                onPressed: () {
-                  setState(() {
-                    _obscureText = !_obscureText;
-                  });
-                },
-              ): null,
-              suffixIconConstraints: (widget.isDense != null) ? const BoxConstraints(
-                  maxHeight: 33
-              ): null,
+              suffixIcon:
+                  widget.suffixIcon
+                      ? IconButton(
+                        icon: Icon(
+                          _obscureText
+                              ? Icons.remove_red_eye
+                              : Icons.visibility_off_outlined,
+                          color: Colors.black54,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscureText = !_obscureText;
+                          });
+                        },
+                      )
+                      : null,
+              suffixIconConstraints:
+                  (widget.isDense != null)
+                      ? const BoxConstraints(maxHeight: 33)
+                      : null,
             ),
             validator: widget.validator,
           ),

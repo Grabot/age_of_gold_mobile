@@ -40,10 +40,7 @@ class AuthStore {
   Future<bool> getUserDetails(LoginResponse loginResponse) async {
     try {
       UserResponse userResponse = await AuthSettings().getUserDetails();
-      User user = User(
-        id: userResponse.id!,
-        username: userResponse.username!,
-      );
+      User user = User(id: userResponse.id!, username: userResponse.username!);
       Me? oldMe = await Storage().getMe();
       if (oldMe != null && oldMe.id != user.id) {
         // new user logged in!
@@ -75,11 +72,12 @@ class AuthStore {
   unsuccessfulLogin() async {
     showToastMessage("User not found");
     secureStorage.clearTokens();
-    navigationService.navigateTo(routes.SignInRoute);
+    navigationService.navigateTo(routes.signInRoute);
   }
 
   successfulLogin(LoginResponse loginResponse) async {
-    if (loginResponse.accessToken == null || loginResponse.refreshToken == null) {
+    if (loginResponse.accessToken == null ||
+        loginResponse.refreshToken == null) {
       throw Exception("Invalid login response: missing tokens");
     }
     await secureStorage.setAccessToken(loginResponse.accessToken!);

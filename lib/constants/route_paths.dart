@@ -1,2 +1,2 @@
-const String AgeOfGoldHomeRoute = 'Home';
-const String SignInRoute = 'SignIn';
+const String ageOfGoldHomeRoute = 'Home';
+const String signInRoute = 'SignIn';

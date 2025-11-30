@@ -1,7 +1,6 @@
 import 'dart:typed_data';
 import 'package:image/image.dart' as image;
 
-
 Uint8List doCrop(List<dynamic> cropData) {
   final originalImage = cropData[0] as image.Image;
   final rect = cropData[1] as List;

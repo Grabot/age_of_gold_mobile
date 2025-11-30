@@ -7,10 +7,7 @@ import 'package:flutter/material.dart';
 class CameraPage extends StatefulWidget {
   final bool videoEnabled;
 
-  const CameraPage({
-    Key? key,
-    this.videoEnabled = false,
-  }) : super(key: key);
+  const CameraPage({super.key, this.videoEnabled = false});
 
   @override
   State<CameraPage> createState() => CameraPageState();
@@ -28,6 +25,7 @@ class CameraPageState extends State<CameraPage> {
 
   takePicture(File imageFile) async {
     Uint8List pictureBytes = await imageFile.readAsBytes();
+    if (!mounted) return;
     Navigator.of(context).pop(pictureBytes);
   }
 
@@ -59,47 +57,50 @@ class CameraPageState extends State<CameraPage> {
                 enablePhysicalButton: true,
                 previewAlignment: Alignment.center,
                 previewFit: CameraPreviewFit.contain,
-                saveConfig: videoEnabled
-                    ? SaveConfig.photoAndVideo(
-                  initialCaptureMode: CaptureMode.photo,
-                  photoPathBuilder: null,
-                  videoPathBuilder: null,
-                  videoOptions: VideoOptions(
-                    enableAudio: true,
-                    ios: CupertinoVideoOptions(
-                      fps: 10,
-                    ),
-                    android: AndroidVideoOptions(
-                      bitrate: 6000000,
-                      fallbackStrategy: QualityFallbackStrategy.lower,
-                    ),
-                  ),
-                  exifPreferences: ExifPreferences(saveGPSLocation: false),
-                )
-                    : SaveConfig.photo(
-                  exifPreferences: ExifPreferences(saveGPSLocation: false),
-                ),
+                saveConfig:
+                    videoEnabled
+                        ? SaveConfig.photoAndVideo(
+                          initialCaptureMode: CaptureMode.photo,
+                          photoPathBuilder: null,
+                          videoPathBuilder: null,
+                          videoOptions: VideoOptions(
+                            enableAudio: true,
+                            ios: CupertinoVideoOptions(fps: 10),
+                            android: AndroidVideoOptions(
+                              bitrate: 6000000,
+                              fallbackStrategy: QualityFallbackStrategy.lower,
+                            ),
+                          ),
+                          exifPreferences: ExifPreferences(
+                            saveGPSLocation: false,
+                          ),
+                        )
+                        : SaveConfig.photo(
+                          exifPreferences: ExifPreferences(
+                            saveGPSLocation: false,
+                          ),
+                        ),
                 builder: (cameraState, preview) {
                   return AwesomeCameraLayout(
                     state: cameraState,
                     topActions: AwesomeTopActions(
-                        state: cameraState,
-                        children: [
-                          AwesomeFlashButton(state: cameraState),
-                          if (cameraState is PhotoCameraState)
-                            AwesomeAspectRatioButton(state: cameraState),
-                          if (cameraState is PhotoCameraState)
-                            IconButton(
-                              icon: Icon(Icons.close, color: Colors.white),
-                              onPressed: () {
-                                Navigator.of(context).pop();
-                              },
-                            ),
-                        ]
+                      state: cameraState,
+                      children: [
+                        AwesomeFlashButton(state: cameraState),
+                        if (cameraState is PhotoCameraState)
+                          AwesomeAspectRatioButton(state: cameraState),
+                        if (cameraState is PhotoCameraState)
+                          IconButton(
+                            icon: Icon(Icons.close, color: Colors.white),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                      ],
                     ),
                     bottomActions: AwesomeBottomActions(
-                        state: cameraState,
-                        right: Container()
+                      state: cameraState,
+                      right: Container(),
                     ),
                   );
                 },
@@ -126,7 +127,9 @@ class CameraPageState extends State<CameraPage> {
                         },
                       );
                     }
-                  } else if (!event.isPicture && event.isVideo && videoEnabled) {
+                  } else if (!event.isPicture &&
+                      event.isVideo &&
+                      videoEnabled) {
                     if (event.status == MediaCaptureStatus.capturing) {
                       // Handle video capturing
                     } else if (event.status == MediaCaptureStatus.success) {
@@ -150,19 +153,13 @@ class CameraPageState extends State<CameraPage> {
                 },
               ),
             ),
-            if (isLoading)
-              Center(
-                child: CircularProgressIndicator(),
-              ),
+            if (isLoading) Center(child: CircularProgressIndicator()),
             if (isLoading)
               Container(
                 width: MediaQuery.of(context).size.width,
                 height: MediaQuery.of(context).size.height,
                 color: Colors.black.withValues(alpha: 0.2),
-                child: AbsorbPointer(
-                  absorbing: true,
-                  child: Container(),
-                ),
+                child: AbsorbPointer(absorbing: true, child: Container()),
               ),
           ],
         ),

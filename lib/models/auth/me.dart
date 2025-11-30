@@ -8,20 +8,13 @@ class Me {
   final bool origin;
   final bool avatarDefault;
 
-  Me({
-    required this.user,
-    required this.origin,
-    this.avatarDefault = true,
-  });
+  Me({required this.user, required this.origin, this.avatarDefault = true});
 
   int get id => user.id;
 
   String toJson() {
     return jsonEncode({
-      'user': {
-        'id': user.id,
-        'username': user.username,
-      },
+      'user': {'id': user.id, 'username': user.username},
       'origin': origin,
       'avatarDefault': avatarDefault,
     });
@@ -41,7 +34,7 @@ class Me {
       'username': user.username,
       'origin': origin ? 1 : 0,
       'avatarDefault': avatarDefault ? 1 : 0,
-      'avatarPath': user.avatarPath
+      'avatarPath': user.avatarPath,
     };
   }
 
@@ -61,5 +54,4 @@ class Me {
   static Future<Me?> load() async {
     return Storage().getMe();
   }
-
 }

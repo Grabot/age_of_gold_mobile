@@ -2,7 +2,6 @@ import 'package:dio/dio.dart';
 import 'app_interceptors.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-
 class AuthApi {
   final dio = createDio();
 
@@ -14,12 +13,12 @@ class AuthApi {
 
   static Dio createDio() {
     var dio = Dio(
-        BaseOptions(
-          baseUrl: dotenv.env['BASEURL'] ?? "",
-          receiveTimeout: const Duration(seconds: 10),
-          connectTimeout: const Duration(seconds: 10),
-          sendTimeout: const Duration(seconds: 10),
-        )
+      BaseOptions(
+        baseUrl: dotenv.env['BASEURL'] ?? "",
+        receiveTimeout: const Duration(seconds: 10),
+        connectTimeout: const Duration(seconds: 10),
+        sendTimeout: const Duration(seconds: 10),
+      ),
     );
 
     dio.interceptors.add(AppInterceptors(dio));

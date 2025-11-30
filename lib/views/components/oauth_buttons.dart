@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 class OAuthButtons {
   static Widget buildOAuthButton(
-      BuildContext context, {
-        required String logoPath,
-        required String label,
-        required VoidCallback onPressed,
-      }) {
+    BuildContext context, {
+    required String logoPath,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
     final screenWidth = MediaQuery.of(context).size.width;
     final buttonSize = screenWidth * 0.15;
     final maxButtonSize = 100.0;
@@ -55,24 +55,25 @@ class OAuthButtons {
   }
 
   static Widget buildOAuthButtonsRow(
-      BuildContext context, {
-        required List<Map<String, String>> buttons,
-        required Function(String) onPressed,
-      }) {
+    BuildContext context, {
+    required List<Map<String, String>> buttons,
+    required Function(String) onPressed,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Wrap(
         alignment: WrapAlignment.center,
         spacing: 16,
         runSpacing: 16,
-        children: buttons.map((button) {
-          return buildOAuthButton(
-            context,
-            logoPath: button['logoPath']!,
-            label: button['label']!,
-            onPressed: () => onPressed(button['provider']!),
-          );
-        }).toList(),
+        children:
+            buttons.map((button) {
+              return buildOAuthButton(
+                context,
+                logoPath: button['logoPath']!,
+                label: button['label']!,
+                onPressed: () => onPressed(button['provider']!),
+              );
+            }).toList(),
       ),
     );
   }

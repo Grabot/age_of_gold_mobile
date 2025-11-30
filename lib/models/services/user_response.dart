@@ -1,4 +1,3 @@
-
 class UserResponse {
   int? id;
   String? username;

@@ -19,9 +19,9 @@ class LogoutDialog {
               onPressed: () async {
                 SecureStorage().clearTokens();
                 Navigator.of(context).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Logged out!')),
-                );
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(const SnackBar(content: Text('Logged out!')));
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const SignInPage()),

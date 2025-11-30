@@ -24,7 +24,8 @@ class SignInPage extends StatefulWidget {
 class _SignInPageState extends State<SignInPage> {
   final _loginFormKey = GlobalKey<FormState>();
   bool _isLoading = false;
-  final TextEditingController _emailOrUsernameController = TextEditingController();
+  final TextEditingController _emailOrUsernameController =
+      TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
 
@@ -49,9 +50,7 @@ class _SignInPageState extends State<SignInPage> {
                 reverse: true,
                 controller: _scrollController,
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight,
-                  ),
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
                   child: IntrinsicHeight(
                     child: Stack(
                       children: [
@@ -67,137 +66,172 @@ class _SignInPageState extends State<SignInPage> {
                                   ),
                                 ),
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 16,
+                                  ),
                                   child: Form(
                                     key: _loginFormKey,
                                     child: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
                                         const SizedBox(height: 10),
-                                    const PageHeading(title: 'Sign in'),
-                                    const SizedBox(height: 16),
-                                    CustomInputField(
-                                      labelText: 'Email or Username',
-                                      hintText: 'Your email or username',
-                                      validator: (textValue) {
-                                        if (textValue == null || textValue.trim().isEmpty) {
-                                          return 'This field is required!';
-                                        }
-                                        return null;
-                                      },
-                                      controller: _emailOrUsernameController,
-                                    ),
-                                    const SizedBox(height: 16),
-                                    CustomInputField(
-                                      labelText: 'Password',
-                                      hintText: 'Your password',
-                                      obscureText: true,
-                                      suffixIcon: true,
-                                      validator: (textValue) {
-                                        if (textValue == null || textValue.trim().isEmpty) {
-                                          return 'Password is required!';
-                                        }
-                                        return null;
-                                      },
-                                      controller: _passwordController,
-                                    ),
-                                    const SizedBox(height: 8),
-                                    Container(
-                                      alignment: Alignment.centerRight,
-                                      child: GestureDetector(
-                                        onTap: () => Navigator.pushReplacement(
+                                        const PageHeading(title: 'Sign in'),
+                                        const SizedBox(height: 16),
+                                        CustomInputField(
+                                          labelText: 'Email or Username',
+                                          hintText: 'Your email or username',
+                                          validator: (textValue) {
+                                            if (textValue == null ||
+                                                textValue.trim().isEmpty) {
+                                              return 'This field is required!';
+                                            }
+                                            return null;
+                                          },
+                                          controller:
+                                              _emailOrUsernameController,
+                                        ),
+                                        const SizedBox(height: 16),
+                                        CustomInputField(
+                                          labelText: 'Password',
+                                          hintText: 'Your password',
+                                          obscureText: true,
+                                          suffixIcon: true,
+                                          validator: (textValue) {
+                                            if (textValue == null ||
+                                                textValue.trim().isEmpty) {
+                                              return 'Password is required!';
+                                            }
+                                            return null;
+                                          },
+                                          controller: _passwordController,
+                                        ),
+                                        const SizedBox(height: 8),
+                                        Container(
+                                          alignment: Alignment.centerRight,
+                                          child: GestureDetector(
+                                            onTap:
+                                                () => Navigator.pushReplacement(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder:
+                                                        (context) =>
+                                                            const ForgetPasswordPage(),
+                                                  ),
+                                                ),
+                                            child: const Text(
+                                              'Forget password?',
+                                              style: TextStyle(
+                                                color: Color(0xff939393),
+                                                fontSize: 13,
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 16),
+                                        CustomFormButton(
+                                          innerText: 'Sign in',
+                                          onPressed: _handleLoginUser,
+                                        ),
+                                        const SizedBox(height: 16),
+                                        const Row(
+                                          children: [
+                                            Expanded(child: Divider()),
+                                            Padding(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 10,
+                                              ),
+                                              child: Text(
+                                                'or sign in with',
+                                                style: TextStyle(
+                                                  color: Color(0xff939393),
+                                                  fontSize: 13,
+                                                ),
+                                              ),
+                                            ),
+                                            Expanded(child: Divider()),
+                                          ],
+                                        ),
+                                        const SizedBox(height: 16),
+                                        // OAuth buttons
+                                        OAuthButtons.buildOAuthButtonsRow(
                                           context,
-                                          MaterialPageRoute(
-                                            builder: (context) => const ForgetPasswordPage(),
-                                          ),
+                                          buttons: [
+                                            {
+                                              'logoPath':
+                                                  'assets/images/oauth2/google_logo.png',
+                                              'label': 'Google',
+                                              'provider': 'google',
+                                            },
+                                            {
+                                              'logoPath':
+                                                  'assets/images/oauth2/apple_logo.png',
+                                              'label': 'Apple',
+                                              'provider': 'apple',
+                                            },
+                                            {
+                                              'logoPath':
+                                                  'assets/images/oauth2/reddit_logo.png',
+                                              'label': 'Reddit',
+                                              'provider': 'reddit',
+                                            },
+                                            {
+                                              'logoPath':
+                                                  'assets/images/oauth2/github_logo.png',
+                                              'label': 'GitHub',
+                                              'provider': 'github',
+                                            },
+                                          ],
+                                          onPressed:
+                                              (provider) =>
+                                                  _handleOAuthSignIn(provider),
                                         ),
-                                        child: const Text(
-                                          'Forget password?',
-                                          style: TextStyle(
-                                            color: Color(0xff939393),
-                                            fontSize: 13,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    CustomFormButton(
-                                      innerText: 'Sign in',
-                                      onPressed: _handleLoginUser,
-                                    ),
-                                    const SizedBox(height: 16),
-                                    const Row(
-                                      children: [
-                                        Expanded(child: Divider()),
-                                        Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 10),
-                                          child: Text(
-                                            'or sign in with',
-                                            style: TextStyle(
-                                              color: Color(0xff939393),
-                                              fontSize: 13,
+                                        const SizedBox(height: 16),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            const Text(
+                                              'Don\'t have an account? ',
+                                              style: TextStyle(
+                                                fontSize: 13,
+                                                color: Color(0xff939393),
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
-                                          ),
+                                            GestureDetector(
+                                              onTap:
+                                                  () => Navigator.pushReplacement(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder:
+                                                          (context) =>
+                                                              const SignUpPage(),
+                                                    ),
+                                                  ),
+                                              child: const Text(
+                                                'Sign-up',
+                                                style: TextStyle(
+                                                  fontSize: 15,
+                                                  color: Color(0xff748288),
+                                                  fontWeight: FontWeight.bold,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
                                         ),
-                                        Expanded(child: Divider()),
+                                        const SizedBox(height: 20),
                                       ],
                                     ),
-                                    const SizedBox(height: 16),
-                                    // OAuth buttons
-                                    OAuthButtons.buildOAuthButtonsRow(
-                                      context,
-                                      buttons: [
-                                        {'logoPath': 'assets/images/oauth2/google_logo.png', 'label': 'Google', 'provider': 'google'},
-                                        {'logoPath': 'assets/images/oauth2/apple_logo.png', 'label': 'Apple', 'provider': 'apple'},
-                                        {'logoPath': 'assets/images/oauth2/reddit_logo.png', 'label': 'Reddit', 'provider': 'reddit'},
-                                        {'logoPath': 'assets/images/oauth2/github_logo.png', 'label': 'GitHub', 'provider': 'github'},
-                                      ],
-                                      onPressed: (provider) => _handleOAuthSignIn(provider),
-                                    ),
-                                    const SizedBox(height: 16),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        const Text(
-                                          'Don\'t have an account? ',
-                                          style: TextStyle(
-                                            fontSize: 13,
-                                            color: Color(0xff939393),
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        GestureDetector(
-                                          onTap: () => Navigator.pushReplacement(
-                                            context,
-                                            MaterialPageRoute(
-                                              builder: (context) => const SignUpPage(),
-                                            ),
-                                          ),
-                                          child: const Text(
-                                            'Sign-up',
-                                            style: TextStyle(
-                                              fontSize: 15,
-                                              color: Color(0xff748288),
-                                              fontWeight: FontWeight.bold,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 20),
-                                    ],
                                   ),
                                 ),
                               ),
                             ),
-                            ),
                           ],
                         ),
                         if (_isLoading)
-                          const Center(
-                            child: CircularProgressIndicator(),
-                          ),
+                          const Center(child: CircularProgressIndicator()),
                       ],
                     ),
                   ),
@@ -228,16 +262,13 @@ class _SignInPageState extends State<SignInPage> {
     final String password = _passwordController.text.trim();
     try {
       LoginResponse? loginResponse = await AuthLogin().signIn(
-        SignInRequest(
-          emailOrUsername: emailOrUsername,
-          password: password,
-        ),
+        SignInRequest(emailOrUsername: emailOrUsername, password: password),
       );
       await AuthStore().successfulLogin(loginResponse);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Sign in successful!')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Sign in successful!')));
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const AgeOfGoldHome()),

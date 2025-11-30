@@ -1,4 +1,3 @@
-
 class BasicResponse {
   bool? success;
 

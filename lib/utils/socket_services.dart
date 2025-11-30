@@ -29,7 +29,7 @@ class SocketServices extends ChangeNotifier {
   startSockConnection() {
     String socketUrl = dotenv.env['BASEURL'] ?? "";
     socket = io.io(socketUrl, <String, dynamic>{
-      'autoConnect': true ,
+      'autoConnect': true,
       'path': "/socket.io",
       'transports': ['websocket'],
     });
@@ -50,30 +50,20 @@ class SocketServices extends ChangeNotifier {
 
   void joinRoomSolo(int userId) {
     joinedSoloRoom = true;
-    socket.emit(
-      "join_solo",
-      {
-        "user_id": userId,
-      },
-    );
+    socket.emit("join_solo", {"user_id": userId});
     // First leave the rooms before joining them
     // This is to prevent multiple joins
     leaveSocketsSolo();
     joinSocketsSolo();
   }
 
-  joinSocketsSolo() {
-  }
+  joinSocketsSolo() {}
 
-  leaveSocketsSolo() {
-  }
+  leaveSocketsSolo() {}
 
   void leaveRoomSolo(int userId) {
     joinedSoloRoom = false;
-    socket.emit(
-      "leave_solo",
-      {"user_id": userId},
-    );
+    socket.emit("leave_solo", {"user_id": userId});
     leaveSocketsSolo();
   }
 

@@ -9,16 +9,6 @@ import 'package:age_of_gold_mobile/utils/auth_store.dart';
 import '../../utils/utils.dart';
 import 'dialogs/change_avatar_dialog.dart';
 
-import 'dart:typed_data';
-import 'package:age_of_gold_mobile/services/auth/auth_settings.dart';
-import 'package:age_of_gold_mobile/utils/secure_storage.dart';
-import 'package:age_of_gold_mobile/views/age_of_gold_home/dialogs/change_username_dialog.dart';
-import 'package:age_of_gold_mobile/views/age_of_gold_home/dialogs/logout_dialog.dart';
-import 'package:flutter/material.dart';
-import 'package:age_of_gold_mobile/utils/auth_store.dart';
-import '../../utils/utils.dart';
-import 'dialogs/change_avatar_dialog.dart';
-
 class AgeOfGoldHome extends StatefulWidget {
   const AgeOfGoldHome({super.key});
 
@@ -71,26 +61,27 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
   }
 
   Widget _buildAvatar() {
-    return Container(
+    return SizedBox(
       width: 120,
       height: 120,
-      child: authStore.me.user.avatar != null
-          ? Image.memory(
-          authStore.me.user.avatar!,
-          width: 120,
-          height: 120,
-          fit: BoxFit.cover,
-      )
-          : Center(
-        child: Text(
-          authStore.me.user.username.substring(0, 1).toUpperCase(),
-          style: const TextStyle(
-            fontSize: 60,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-      ),
+      child:
+          authStore.me.user.avatar != null
+              ? Image.memory(
+                authStore.me.user.avatar!,
+                width: 120,
+                height: 120,
+                fit: BoxFit.cover,
+              )
+              : Center(
+                child: Text(
+                  authStore.me.user.username.substring(0, 1).toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 60,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
     );
   }
 
@@ -101,38 +92,42 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
       child: PopupMenuButton<String>(
         enabled: !_isLoading,
         icon: const Icon(Icons.settings, color: Colors.grey),
-        onSelected: _isLoading
-            ? null
-            : (value) {
-          if (value == 'logout') {
-            _showLogoutDialog(context);
-          } else if (value == 'change_username') {
-            _showChangeUsernameDialog(context);
-          } else if (value == 'change_avatar') {
-            _showChangeAvatarDialog(context).then((avatarChanged) {
-              if (mounted && avatarChanged) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Avatar updated successfully!')),
-                );
-                setState(() {});
-              }
-            });
-          }
-        },
-        itemBuilder: (BuildContext context) => [
-          const PopupMenuItem<String>(
-            value: 'change_username',
-            child: Text('Change Username'),
-          ),
-          const PopupMenuItem<String>(
-            value: 'change_avatar',
-            child: Text('Change Avatar'),
-          ),
-          const PopupMenuItem<String>(
-            value: 'logout',
-            child: Text('Logout'),
-          ),
-        ],
+        onSelected:
+            _isLoading
+                ? null
+                : (value) {
+                  if (value == 'logout') {
+                    _showLogoutDialog(context);
+                  } else if (value == 'change_username') {
+                    _showChangeUsernameDialog(context);
+                  } else if (value == 'change_avatar') {
+                    _showChangeAvatarDialog(context).then((avatarChanged) {
+                      if (mounted && avatarChanged) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Avatar updated successfully!'),
+                          ),
+                        );
+                        setState(() {});
+                      }
+                    });
+                  }
+                },
+        itemBuilder:
+            (BuildContext context) => [
+              const PopupMenuItem<String>(
+                value: 'change_username',
+                child: Text('Change Username'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'change_avatar',
+                child: Text('Change Avatar'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'logout',
+                child: Text('Logout'),
+              ),
+            ],
       ),
     );
   }
@@ -160,11 +155,12 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
                 SizedBox(
                   width: 200,
                   child: ElevatedButton(
-                    onPressed: _isLoading
-                        ? null
-                        : () {
-                      _showLogoutDialog(context);
-                    },
+                    onPressed:
+                        _isLoading
+                            ? null
+                            : () {
+                              _showLogoutDialog(context);
+                            },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.redAccent[700],
                       shape: RoundedRectangleBorder(
@@ -174,10 +170,7 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
                     ),
                     child: const Text(
                       'Logout',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                   ),
                 ),
@@ -202,9 +195,7 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
               child: Container(
                 decoration: const BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(20),
-                  ),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
                 ),
                 width: MediaQuery.of(context).size.width * 0.9,
                 height: MediaQuery.of(context).size.height * 0.8,
@@ -214,7 +205,7 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
           ),
           if (_isLoading)
             Container(
-              color: Colors.black.withOpacity(0.5),
+              color: Colors.black.withValues(alpha: 0.5),
               child: const Center(
                 child: CircularProgressIndicator(color: Colors.white),
               ),
@@ -279,7 +270,10 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
               if (authStore.me.user.avatarPath == null) {
                 throw Exception("Avatar path is not found");
               }
-              await AuthSettings().updateAvatar(authStore.me.user.avatarPath!, defaultAvatar);
+              await AuthSettings().updateAvatar(
+                authStore.me.user.avatarPath!,
+                defaultAvatar,
+              );
               int avatarVersion = await SecureStorage().getAvatarVersion();
               await SecureStorage().setAvatarVersion(avatarVersion + 1);
             } catch (e) {

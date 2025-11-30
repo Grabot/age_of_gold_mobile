@@ -1,7 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SecureStorage {
-
   final storage = const FlutterSecureStorage();
 
   final String _keyAccessToken = 'accessToken';
@@ -22,7 +21,10 @@ class SecureStorage {
   }
 
   Future setAccessTokenExpiration(int expiration) async {
-    await storage.write(key: _keyAccessTokenExpiration, value: expiration.toString());
+    await storage.write(
+      key: _keyAccessTokenExpiration,
+      value: expiration.toString(),
+    );
   }
 
   Future<int?> getAccessTokenExpiration() async {
@@ -39,7 +41,10 @@ class SecureStorage {
   }
 
   Future setRefreshTokenExpiration(int expiration) async {
-    await storage.write(key: _keyRefreshTokenExpiration, value: expiration.toString());
+    await storage.write(
+      key: _keyRefreshTokenExpiration,
+      value: expiration.toString(),
+    );
   }
 
   clearTokens() {
@@ -67,7 +72,10 @@ class SecureStorage {
   }
 
   Future setProfileVersion(int profileVersion) async {
-    await storage.write(key: _keyProfileVersion, value: profileVersion.toString());
+    await storage.write(
+      key: _keyProfileVersion,
+      value: profileVersion.toString(),
+    );
   }
 
   Future<int> getAvatarVersion() async {
@@ -76,7 +84,10 @@ class SecureStorage {
   }
 
   Future setAvatarVersion(int avatarVersion) async {
-    await storage.write(key: _keyAvatarVersion, value: avatarVersion.toString());
+    await storage.write(
+      key: _keyAvatarVersion,
+      value: avatarVersion.toString(),
+    );
   }
 
   Future<void> setShouldUpdateAvatar(bool value) async {
@@ -89,7 +100,10 @@ class SecureStorage {
   }
 
   Future<void> setLastValidation(int millisecondsSinceEpoch) async {
-    await storage.write(key: _keyLastValidation, value: millisecondsSinceEpoch.toString());
+    await storage.write(
+      key: _keyLastValidation,
+      value: millisecondsSinceEpoch.toString(),
+    );
   }
 
   Future<int> getLastValidation() async {

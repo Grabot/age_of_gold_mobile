@@ -46,8 +46,13 @@ class _OpeningScreenState extends State<OpeningScreen> {
   }
 
   Widget startupView() {
-    // TODO: Just show a logo or something?
-    return Container();
+    return Center(
+      child: SizedBox(
+        width: 300,
+        height: 300,
+        child: Image.asset('assets/images/gold_placeholder.png'),
+      ),
+    );
   }
 
   @override
@@ -91,7 +96,11 @@ class _OpeningScreenState extends State<OpeningScreen> {
                             ),
                             GestureDetector(
                               onTap: () {
-                                launchUrl(Uri.parse(dotenv.env['AGE_OF_GOLD_PRIVACY_URL'] ?? ""));
+                                launchUrl(
+                                  Uri.parse(
+                                    dotenv.env['AGE_OF_GOLD_PRIVACY_URL'] ?? "",
+                                  ),
+                                );
                               },
                               child: Text(
                                 "privacy policy.",
@@ -134,7 +143,11 @@ class _OpeningScreenState extends State<OpeningScreen> {
                             ),
                             GestureDetector(
                               onTap: () {
-                                launchUrl(Uri.parse(dotenv.env['AGE_OF_GOLD_TERMS_URL'] ?? ""));
+                                launchUrl(
+                                  Uri.parse(
+                                    dotenv.env['AGE_OF_GOLD_TERMS_URL'] ?? "",
+                                  ),
+                                );
                               },
                               child: Text(
                                 "Terms and Service.",
@@ -154,17 +167,25 @@ class _OpeningScreenState extends State<OpeningScreen> {
                         onPressed: agreeAndContinue,
                       ),
                       SizedBox(height: 40),
-                      Text("from", style: TextStyle(color: Colors.blueGrey, fontSize: 12)),
+                      Text(
+                        "from",
+                        style: TextStyle(color: Colors.blueGrey, fontSize: 12),
+                      ),
                       SizedBox(height: 6),
                       zwaarDevelopersLogo(200, true),
-                      Text("developers", style: TextStyle(color: Colors.blueGrey, fontSize: 20)),
+                      Text(
+                        "developers",
+                        style: TextStyle(color: Colors.blueGrey, fontSize: 20),
+                      ),
                       SizedBox(height: 40),
                     ],
                   ),
                 ),
             if (_isLoading)
               Container(
-                color: Colors.black.withOpacity(0.5), // Semi-transparent overlay
+                color: Colors.black.withValues(
+                  alpha: 0.5,
+                ), // Semi-transparent overlay
                 child: const Center(child: CircularProgressIndicator()),
               ),
           ],

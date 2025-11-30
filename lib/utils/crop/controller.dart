@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 
-
 class CropController {
   late CropControllerDelegate _delegate;
 
@@ -8,7 +7,6 @@ class CropController {
   void crop() => _delegate.onCrop();
   void reset() => _delegate.onReset();
   set image(Uint8List value) => _delegate.onImageChanged(value);
-
 }
 
 class CropControllerDelegate {

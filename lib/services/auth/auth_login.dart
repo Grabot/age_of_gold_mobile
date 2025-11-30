@@ -9,7 +9,6 @@ import '../../models/services/sign_up_request.dart';
 import 'app_interceptors.dart';
 import 'auth_api.dart';
 
-
 class AuthLogin {
   static AuthLogin? _instance;
   factory AuthLogin() => _instance ??= AuthLogin._internal();
@@ -19,14 +18,18 @@ class AuthLogin {
     try {
       final response = await CleanApi().dio.post(
         "${dotenv.env['API_VERSION']}/register",
-        options: Options(headers: {
-          HttpHeaders.contentTypeHeader: "application/json",
-        }),
+        options: Options(
+          headers: {HttpHeaders.contentTypeHeader: "application/json"},
+        ),
         data: signUpRequest.toJson(),
       );
       final loginResponse = LoginResponse.fromJson(response.data);
-      if (loginResponse.accessToken == null || loginResponse.refreshToken == null) {
-        throw UnauthorizedException(response.requestOptions, "Invalid login response");
+      if (loginResponse.accessToken == null ||
+          loginResponse.refreshToken == null) {
+        throw UnauthorizedException(
+          response.requestOptions,
+          "Invalid login response",
+        );
       }
       return loginResponse;
     } on DioException catch (e) {
@@ -38,12 +41,18 @@ class AuthLogin {
     try {
       final response = await CleanApi().dio.post(
         "${dotenv.env['API_VERSION']}/login",
-        options: Options(headers: {HttpHeaders.contentTypeHeader: "application/json"}),
+        options: Options(
+          headers: {HttpHeaders.contentTypeHeader: "application/json"},
+        ),
         data: signInRequest.toJson(),
       );
       final loginResponse = LoginResponse.fromJson(response.data);
-      if (loginResponse.accessToken == null || loginResponse.refreshToken == null) {
-        throw UnauthorizedException(response.requestOptions, "Invalid login response");
+      if (loginResponse.accessToken == null ||
+          loginResponse.refreshToken == null) {
+        throw UnauthorizedException(
+          response.requestOptions,
+          "Invalid login response",
+        );
       }
       return loginResponse;
     } on DioException catch (e) {
@@ -51,21 +60,24 @@ class AuthLogin {
     }
   }
 
-  Future<LoginResponse> refreshToken(String accessToken, String refreshToken) async {
+  Future<LoginResponse> refreshToken(
+    String accessToken,
+    String refreshToken,
+  ) async {
     try {
       final response = await CleanApi().dio.post(
         "${dotenv.env['API_VERSION']}/login/token/refresh",
-        options: Options(headers: {
-          HttpHeaders.contentTypeHeader: "application/json",
-        }),
+        options: Options(
+          headers: {HttpHeaders.contentTypeHeader: "application/json"},
+        ),
         data: jsonEncode(<String, String>{
           "access_token": accessToken,
           "refresh_token": refreshToken,
-        }
-        )
+        }),
       );
       final loginResponse = LoginResponse.fromJson(response.data);
-      if (loginResponse.accessToken == null || loginResponse.refreshToken == null) {
+      if (loginResponse.accessToken == null ||
+          loginResponse.refreshToken == null) {
         throw Exception("Refresh token is not valid");
       }
       return loginResponse;
@@ -78,13 +90,17 @@ class AuthLogin {
     try {
       final response = await AuthApi().dio.post(
         "${dotenv.env['API_VERSION']}/login/token",
-        options: Options(headers: {
-          HttpHeaders.contentTypeHeader: "application/json",
-        }),
+        options: Options(
+          headers: {HttpHeaders.contentTypeHeader: "application/json"},
+        ),
       );
       final loginResponse = LoginResponse.fromJson(response.data);
-      if (loginResponse.accessToken == null || loginResponse.refreshToken == null) {
-        throw UnauthorizedException(response.requestOptions, "Invalid login response");
+      if (loginResponse.accessToken == null ||
+          loginResponse.refreshToken == null) {
+        throw UnauthorizedException(
+          response.requestOptions,
+          "Invalid login response",
+        );
       }
       return loginResponse;
     } on DioException catch (e) {

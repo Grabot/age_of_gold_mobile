@@ -1,8 +1,9 @@
+import 'dart:io';
+
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 import '../models/auth/me.dart';
-
 
 class Storage {
   static const _dbName = "age_of_gold.db";
@@ -23,7 +24,6 @@ class Storage {
     return based!;
   }
 
-  // Creates and opens the database.
   _initDatabase() async {
     var databasesPath = await getDatabasesPath();
     String path = join(databasesPath, _dbName);
@@ -36,18 +36,15 @@ class Storage {
     );
   }
 
-  Future _onCreate(Database db, int version,) async {
+  Future _onCreate(Database db, int version) async {
     await createTableMe(db);
   }
 
-  Future _onUpgrade(Database db, int oldVersion, int newVersion,) async {
-    if (oldVersion == 1 && newVersion >= 2) {
-    }
+  Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
+    if (oldVersion == 1 && newVersion >= 2) {}
   }
 
   createTableMe(Database db) async {
-    // Save all the broup information in the database
-    // The messages will be a list with message ids
     await db.execute('''
       CREATE TABLE Me (
         id INTEGER PRIMARY KEY,
@@ -86,18 +83,21 @@ class Storage {
     }
   }
 
-  // Clear Me from the database
   Future<void> clearMe() async {
     try {
-      // TODO: Also delete any possible avatar?
       final db = await database;
+      final maps = await db.query('Me', limit: 1);
+      if (maps.isEmpty) return;
+      Me clearingMe = Me.fromMap(maps.first);
+      if (clearingMe.user.avatarPath != null) {
+        await File(clearingMe.user.avatarPath!).delete();
+      }
       await db.delete('Me');
     } catch (e) {
       // logger.e('Failed to clear Me: $e');
       rethrow;
     }
   }
-
 
   clearDatabase() async {
     Database database = await this.database;

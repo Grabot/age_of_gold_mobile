@@ -1,4 +1,3 @@
-
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -11,18 +10,11 @@ class User {
   User({required this.id, required this.username, this.avatarPath});
 
   factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'] as int,
-      username: json['username'] as String,
-    );
+    return User(id: json['id'] as int, username: json['username'] as String);
   }
 
   Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'username': username,
-      'avatarPath': avatarPath,
-    };
+    return {'id': id, 'username': username, 'avatarPath': avatarPath};
   }
 
   factory User.fromMap(Map<String, dynamic> map) {

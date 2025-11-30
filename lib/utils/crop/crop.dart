@@ -11,17 +11,11 @@ const dotTotalSize = 50.0;
 
 typedef CroppingAreaBuilder = Rect Function(Rect imageRect);
 
-enum EdgeAlignment {
-  topLeft,
-  topRight,
-  bottomLeft,
-  bottomRight,
-}
+enum EdgeAlignment { topLeft, topRight, bottomLeft, bottomRight }
 
 enum CropStatus { loading, ready, cropping }
 
 class Crop extends StatelessWidget {
-
   final Uint8List image;
   final ValueChanged<Uint8List> onCropped;
 
@@ -43,9 +37,9 @@ class Crop extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final newData = MediaQuery.of(context).copyWith(
-          size: constraints.biggest,
-        );
+        final newData = MediaQuery.of(
+          context,
+        ).copyWith(size: constraints.biggest);
         return MediaQuery(
           data: newData,
           child: _CropEditor(
@@ -94,9 +88,10 @@ class _CropEditorState extends State<_CropEditor> {
   bool imageLoaded = false;
   int maxSize = 1024;
 
-  _Calculator get calculator => _isFitVertically
-      ? const _VerticalCalculator()
-      : const _HorizontalCalculator();
+  _Calculator get calculator =>
+      _isFitVertically
+          ? const _VerticalCalculator()
+          : const _HorizontalCalculator();
 
   set rect(Rect newRect) {
     setState(() {
@@ -110,10 +105,11 @@ class _CropEditorState extends State<_CropEditor> {
   @override
   void initState() {
     _cropController = widget.controller ?? CropController();
-    _cropController.delegate = CropControllerDelegate()
-      ..onCrop = _crop
-      ..onReset = resetClipArea
-      ..onImageChanged = _resetImage;
+    _cropController.delegate =
+        CropControllerDelegate()
+          ..onCrop = _crop
+          ..onReset = resetClipArea
+          ..onImageChanged = _resetImage;
 
     super.initState();
   }
@@ -202,7 +198,6 @@ class _CropEditorState extends State<_CropEditor> {
   }
 
   void _resizeWith() {
-
     rect = calculator.initialCropRect(
       MediaQuery.of(context).size,
       _imageRect,
@@ -225,6 +220,7 @@ class _CropEditorState extends State<_CropEditor> {
     }
     imageLoaded = false;
 
+    if (!mounted) return;
     final screenSizeRatio = calculator.screenSizeRatio(
       _targetImage!,
       MediaQuery.of(context).size,
@@ -234,20 +230,14 @@ class _CropEditorState extends State<_CropEditor> {
       (_rect.left - _imageRect.left) * screenSizeRatio,
       (_rect.top - _imageRect.top) * screenSizeRatio,
       _rect.width * screenSizeRatio,
-      _rect.height * screenSizeRatio
+      _rect.height * screenSizeRatio,
     ];
 
     cropMobile(rectangle);
   }
 
   cropMobile(List rectangle) {
-    compute(
-      doCrop,
-      [
-        _targetImage!,
-        rectangle
-      ],
-    ).then((cropResult) {
+    compute(doCrop, [_targetImage!, rectangle]).then((cropResult) {
       widget.onCropped(cropResult);
       widget.onStatusChanged?.call(CropStatus.ready);
       imageLoaded = true;
@@ -276,12 +266,14 @@ class _CropEditorState extends State<_CropEditor> {
                     top: _imageRect.top,
                     child: Image.memory(
                       widget.image,
-                      width: _isFitVertically
-                          ? null
-                          : MediaQuery.of(context).size.width,
-                      height: _isFitVertically
-                          ? MediaQuery.of(context).size.height
-                          : null,
+                      width:
+                          _isFitVertically
+                              ? null
+                              : MediaQuery.of(context).size.width,
+                      height:
+                          _isFitVertically
+                              ? MediaQuery.of(context).size.height
+                              : null,
                       fit: BoxFit.contain,
                     ),
                   ),
@@ -322,9 +314,10 @@ class _CropEditorState extends State<_CropEditor> {
             ),
           ),
         ),
-        Positioned( // top left
-          left: _rect.left - (dotTotalSize/4),
-          top: _rect.top - (dotTotalSize/4),
+        Positioned(
+          // top left
+          left: _rect.left - (dotTotalSize / 4),
+          top: _rect.top - (dotTotalSize / 4),
           child: GestureDetector(
             onPanUpdate: (details) {
               rect = calculator.moveTopLeft(
@@ -341,7 +334,8 @@ class _CropEditorState extends State<_CropEditor> {
             child: const DotControl(),
           ),
         ),
-        Positioned( // top right
+        Positioned(
+          // top right
           left: _rect.right - (dotTotalSize / 4) * 3,
           top: _rect.top - (dotTotalSize / 4),
           child: GestureDetector(
@@ -360,7 +354,8 @@ class _CropEditorState extends State<_CropEditor> {
             child: const DotControl(),
           ),
         ),
-        Positioned( // bottom left
+        Positioned(
+          // bottom left
           left: _rect.left - (dotTotalSize / 4),
           top: _rect.bottom - (dotTotalSize / 4) * 3,
           child: GestureDetector(
@@ -379,7 +374,8 @@ class _CropEditorState extends State<_CropEditor> {
             child: const DotControl(),
           ),
         ),
-        Positioned( // bottom right
+        Positioned(
+          // bottom right
           left: _rect.right - (dotTotalSize / 4) * 3,
           top: _rect.bottom - (dotTotalSize / 4) * 3,
           child: GestureDetector(
@@ -426,11 +422,7 @@ class _CropAreaSquareClipper extends CustomClipper<Path> {
 /// Defalt dot widget placed on corners to control cropping area.
 /// This Widget automaticall fits the appropriate size.
 class DotControl extends StatelessWidget {
-  const DotControl({
-    super.key,
-    this.color = Colors.white,
-    this.padding = 8,
-  });
+  const DotControl({super.key, this.color = Colors.white, this.padding = 8});
 
   /// [Color] of this widget. [Colors.white] by default.
   final Color color;
@@ -474,7 +466,11 @@ abstract class _Calculator {
 
   /// calculates [Rect] of initial cropping area.
   Rect initialCropRect(
-      Size screenSize, Rect imageRect, double aspectRatio, double sizeRatio);
+    Size screenSize,
+    Rect imageRect,
+    double aspectRatio,
+    double sizeRatio,
+  );
 
   /// calculates initial scale of image to cover _CropEditor
   double scaleToCover(Size screenSize, Rect imageRect);
@@ -505,19 +501,23 @@ abstract class _Calculator {
   }
 
   /// calculates [Rect] of the result of user moving the top-left dot.
-  Rect moveTopLeft(Rect original, double deltaX, double deltaY, Rect imageRect,
-      double? aspectRatio) {
-    final newLeft =
-    max(imageRect.left, min(original.left + deltaX, original.right - 40));
-    final newTop =
-    min(max(original.top + deltaY, imageRect.top), original.bottom - 40);
+  Rect moveTopLeft(
+    Rect original,
+    double deltaX,
+    double deltaY,
+    Rect imageRect,
+    double? aspectRatio,
+  ) {
+    final newLeft = max(
+      imageRect.left,
+      min(original.left + deltaX, original.right - 40),
+    );
+    final newTop = min(
+      max(original.top + deltaY, imageRect.top),
+      original.bottom - 40,
+    );
     if (aspectRatio == null) {
-      return Rect.fromLTRB(
-        newLeft,
-        newTop,
-        original.right,
-        original.bottom,
-      );
+      return Rect.fromLTRB(newLeft, newTop, original.right, original.bottom);
     } else {
       if (deltaX.abs() > deltaY.abs()) {
         var newWidth = original.right - newLeft;
@@ -550,19 +550,23 @@ abstract class _Calculator {
     }
   }
 
-  Rect moveTopRight(Rect original, double deltaX, double deltaY, Rect imageRect,
-      double? aspectRatio) {
-    final newTop =
-    min(max(original.top + deltaY, imageRect.top), original.bottom - 40);
-    final newRight =
-    max(min(original.right + deltaX, imageRect.right), original.left + 40);
+  Rect moveTopRight(
+    Rect original,
+    double deltaX,
+    double deltaY,
+    Rect imageRect,
+    double? aspectRatio,
+  ) {
+    final newTop = min(
+      max(original.top + deltaY, imageRect.top),
+      original.bottom - 40,
+    );
+    final newRight = max(
+      min(original.right + deltaX, imageRect.right),
+      original.left + 40,
+    );
     if (aspectRatio == null) {
-      return Rect.fromLTRB(
-        original.left,
-        newTop,
-        newRight,
-        original.bottom,
-      );
+      return Rect.fromLTRB(original.left, newTop, newRight, original.bottom);
     } else {
       if (deltaX.abs() > deltaY.abs()) {
         var newWidth = newRight - original.left;
@@ -595,20 +599,24 @@ abstract class _Calculator {
     }
   }
 
-  Rect moveBottomLeft(Rect original, double deltaX, double deltaY,
-      Rect imageRect, double? aspectRatio) {
-    final newLeft =
-    max(imageRect.left, min(original.left + deltaX, original.right - 40));
-    final newBottom =
-    max(min(original.bottom + deltaY, imageRect.bottom), original.top + 40);
+  Rect moveBottomLeft(
+    Rect original,
+    double deltaX,
+    double deltaY,
+    Rect imageRect,
+    double? aspectRatio,
+  ) {
+    final newLeft = max(
+      imageRect.left,
+      min(original.left + deltaX, original.right - 40),
+    );
+    final newBottom = max(
+      min(original.bottom + deltaY, imageRect.bottom),
+      original.top + 40,
+    );
 
     if (aspectRatio == null) {
-      return Rect.fromLTRB(
-        newLeft,
-        original.top,
-        original.right,
-        newBottom,
-      );
+      return Rect.fromLTRB(newLeft, original.top, original.right, newBottom);
     } else {
       if (deltaX.abs() > deltaY.abs()) {
         var newWidth = original.right - newLeft;
@@ -641,19 +649,23 @@ abstract class _Calculator {
     }
   }
 
-  Rect moveBottomRight(Rect original, double deltaX, double deltaY,
-      Rect imageRect, double? aspectRatio) {
-    final newRight =
-    min(imageRect.right, max(original.right + deltaX, original.left + 40));
-    final newBottom =
-    max(min(original.bottom + deltaY, imageRect.bottom), original.top + 40);
+  Rect moveBottomRight(
+    Rect original,
+    double deltaX,
+    double deltaY,
+    Rect imageRect,
+    double? aspectRatio,
+  ) {
+    final newRight = min(
+      imageRect.right,
+      max(original.right + deltaX, original.left + 40),
+    );
+    final newBottom = max(
+      min(original.bottom + deltaY, imageRect.bottom),
+      original.top + 40,
+    );
     if (aspectRatio == null) {
-      return Rect.fromLTRB(
-        original.left,
-        original.top,
-        newRight,
-        newBottom,
-      );
+      return Rect.fromLTRB(original.left, original.top, newRight, newBottom);
     } else {
       if (deltaX.abs() > deltaY.abs()) {
         var newWidth = newRight - original.left;
@@ -663,12 +675,7 @@ abstract class _Calculator {
           newWidth = newHeight * aspectRatio;
         }
 
-        return Rect.fromLTWH(
-          original.left,
-          original.top,
-          newWidth,
-          newHeight,
-        );
+        return Rect.fromLTWH(original.left, original.top, newWidth, newHeight);
       } else {
         var newHeight = newBottom - original.top;
         var newWidth = newHeight * aspectRatio;
@@ -676,12 +683,7 @@ abstract class _Calculator {
           newWidth = imageRect.right - original.left;
           newHeight = newWidth / aspectRatio;
         }
-        return Rect.fromLTWH(
-          original.left,
-          original.top,
-          newWidth,
-          newHeight,
-        );
+        return Rect.fromLTWH(original.left, original.top, newWidth, newHeight);
       }
     }
   }
@@ -710,15 +712,24 @@ class _HorizontalCalculator extends _Calculator {
 
   @override
   Rect initialCropRect(
-      Size screenSize, Rect imageRect, double aspectRatio, double sizeRatio) {
+    Size screenSize,
+    Rect imageRect,
+    double aspectRatio,
+    double sizeRatio,
+  ) {
     final imageRatio = imageRect.width / imageRect.height;
     final imageScreenHeight = screenSize.width / imageRatio;
 
-    final initialSize = imageRatio > aspectRatio
-        ? Size((imageScreenHeight * aspectRatio) * sizeRatio,
-        imageScreenHeight * sizeRatio)
-        : Size(screenSize.width * sizeRatio,
-        (screenSize.width / aspectRatio) * sizeRatio);
+    final initialSize =
+        imageRatio > aspectRatio
+            ? Size(
+              (imageScreenHeight * aspectRatio) * sizeRatio,
+              imageScreenHeight * sizeRatio,
+            )
+            : Size(
+              screenSize.width * sizeRatio,
+              (screenSize.width / aspectRatio) * sizeRatio,
+            );
 
     return Rect.fromLTWH(
       (screenSize.width - initialSize.width) / 2,
@@ -752,15 +763,24 @@ class _VerticalCalculator extends _Calculator {
 
   @override
   Rect initialCropRect(
-      Size screenSize, Rect imageRect, double aspectRatio, double sizeRatio) {
+    Size screenSize,
+    Rect imageRect,
+    double aspectRatio,
+    double sizeRatio,
+  ) {
     final imageRatio = imageRect.width / imageRect.height;
     final imageScreenWidth = screenSize.height * imageRatio;
 
-    final initialSize = imageRatio < aspectRatio
-        ? Size(imageScreenWidth * sizeRatio,
-        imageScreenWidth / aspectRatio * sizeRatio)
-        : Size((screenSize.height * aspectRatio) * sizeRatio,
-        screenSize.height * sizeRatio);
+    final initialSize =
+        imageRatio < aspectRatio
+            ? Size(
+              imageScreenWidth * sizeRatio,
+              imageScreenWidth / aspectRatio * sizeRatio,
+            )
+            : Size(
+              (screenSize.height * aspectRatio) * sizeRatio,
+              screenSize.height * sizeRatio,
+            );
 
     return Rect.fromLTWH(
       (screenSize.width - initialSize.width) / 2,
@@ -780,4 +800,3 @@ class _VerticalCalculator extends _Calculator {
     return targetImage.height / screenSize.height;
   }
 }
-

@@ -51,9 +51,7 @@ class _SignUpPageState extends State<SignUpPage> {
                 reverse: true,
                 controller: _scrollController,
                 child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight,
-                  ),
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
                   child: IntrinsicHeight(
                     child: Stack(
                       children: [
@@ -64,10 +62,15 @@ class _SignUpPageState extends State<SignUpPage> {
                               child: Container(
                                 decoration: const BoxDecoration(
                                   color: Colors.white,
-                                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                                  borderRadius: BorderRadius.vertical(
+                                    top: Radius.circular(20),
+                                  ),
                                 ),
                                 child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 24,
+                                    vertical: 16,
+                                  ),
                                   child: Form(
                                     key: _signupFormKey,
                                     child: Column(
@@ -82,7 +85,8 @@ class _SignUpPageState extends State<SignUpPage> {
                                           isDense: true,
                                           controller: _usernameController,
                                           validator: (textValue) {
-                                            if (textValue == null || textValue.trim().isEmpty) {
+                                            if (textValue == null ||
+                                                textValue.trim().isEmpty) {
                                               return 'Username is required!';
                                             }
                                             return null;
@@ -95,10 +99,13 @@ class _SignUpPageState extends State<SignUpPage> {
                                           isDense: true,
                                           controller: _emailController,
                                           validator: (textValue) {
-                                            if (textValue == null || textValue.trim().isEmpty) {
+                                            if (textValue == null ||
+                                                textValue.trim().isEmpty) {
                                               return 'Email is required!';
                                             }
-                                            if (!EmailValidator.validate(textValue.trim())) {
+                                            if (!EmailValidator.validate(
+                                              textValue.trim(),
+                                            )) {
                                               return 'Please enter a valid email';
                                             }
                                             return null;
@@ -112,7 +119,8 @@ class _SignUpPageState extends State<SignUpPage> {
                                           obscureText: true,
                                           controller: _passwordController,
                                           validator: (textValue) {
-                                            if (textValue == null || textValue.trim().isEmpty) {
+                                            if (textValue == null ||
+                                                textValue.trim().isEmpty) {
                                               return 'Password is required!';
                                             }
                                             return null;
@@ -130,7 +138,9 @@ class _SignUpPageState extends State<SignUpPage> {
                                           children: [
                                             Expanded(child: Divider()),
                                             Padding(
-                                              padding: EdgeInsets.symmetric(horizontal: 10),
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 10,
+                                              ),
                                               child: Text(
                                                 'or sign up with',
                                                 style: TextStyle(
@@ -146,16 +156,39 @@ class _SignUpPageState extends State<SignUpPage> {
                                         OAuthButtons.buildOAuthButtonsRow(
                                           context,
                                           buttons: [
-                                            {'logoPath': 'assets/images/oauth2/google_logo.png', 'label': 'Google', 'provider': 'google'},
-                                            {'logoPath': 'assets/images/oauth2/apple_logo.png', 'label': 'Apple', 'provider': 'apple'},
-                                            {'logoPath': 'assets/images/oauth2/reddit_logo.png', 'label': 'Reddit', 'provider': 'reddit'},
-                                            {'logoPath': 'assets/images/oauth2/github_logo.png', 'label': 'GitHub', 'provider': 'github'},
+                                            {
+                                              'logoPath':
+                                                  'assets/images/oauth2/google_logo.png',
+                                              'label': 'Google',
+                                              'provider': 'google',
+                                            },
+                                            {
+                                              'logoPath':
+                                                  'assets/images/oauth2/apple_logo.png',
+                                              'label': 'Apple',
+                                              'provider': 'apple',
+                                            },
+                                            {
+                                              'logoPath':
+                                                  'assets/images/oauth2/reddit_logo.png',
+                                              'label': 'Reddit',
+                                              'provider': 'reddit',
+                                            },
+                                            {
+                                              'logoPath':
+                                                  'assets/images/oauth2/github_logo.png',
+                                              'label': 'GitHub',
+                                              'provider': 'github',
+                                            },
                                           ],
-                                          onPressed: (provider) => _handleOAuthSignUp(provider),
+                                          onPressed:
+                                              (provider) =>
+                                                  _handleOAuthSignUp(provider),
                                         ),
                                         const SizedBox(height: 16),
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
                                             const Text(
                                               'Already have an account? ',
@@ -166,10 +199,15 @@ class _SignUpPageState extends State<SignUpPage> {
                                               ),
                                             ),
                                             GestureDetector(
-                                              onTap: () => Navigator.pushReplacement(
-                                                context,
-                                                MaterialPageRoute(builder: (context) => const SignInPage()),
-                                              ),
+                                              onTap:
+                                                  () => Navigator.pushReplacement(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder:
+                                                          (context) =>
+                                                              const SignInPage(),
+                                                    ),
+                                                  ),
                                               child: const Text(
                                                 'Sign in',
                                                 style: TextStyle(
@@ -191,9 +229,7 @@ class _SignUpPageState extends State<SignUpPage> {
                           ],
                         ),
                         if (_isLoading)
-                          const Center(
-                            child: CircularProgressIndicator(),
-                          ),
+                          const Center(child: CircularProgressIndicator()),
                       ],
                     ),
                   ),
@@ -225,17 +261,13 @@ class _SignUpPageState extends State<SignUpPage> {
     final String password = _passwordController.text.trim();
     try {
       LoginResponse loginResponse = await AuthLogin().signUp(
-          SignUpRequest(
-            email: email,
-            username: username,
-            password: password,
-          )
+        SignUpRequest(email: email, username: username, password: password),
       );
       await AuthStore().successfulLogin(loginResponse);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Sign up successful!')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Sign up successful!')));
       await Future.delayed(const Duration(seconds: 1));
       if (!mounted) return;
       Navigator.pushReplacement(

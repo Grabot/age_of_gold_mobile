@@ -13,16 +13,13 @@ class ChangeAvatarDialog extends StatefulWidget {
   final Function(Uint8List, bool) onSave;
   final int maxSize = 2 * 1024 * 1024;
 
-  const ChangeAvatarDialog({
-    Key? key,
-    required this.onSave,
-  }) : super(key: key);
+  const ChangeAvatarDialog({super.key, required this.onSave});
 
   @override
-  _ChangeAvatarDialogState createState() => _ChangeAvatarDialogState();
+  ChangeAvatarDialogState createState() => ChangeAvatarDialogState();
 }
 
-class _ChangeAvatarDialogState extends State<ChangeAvatarDialog> {
+class ChangeAvatarDialogState extends State<ChangeAvatarDialog> {
   late CropController cropController;
   late Uint8List imageMain;
   late Uint8List imageCrop;
@@ -102,9 +99,10 @@ class _ChangeAvatarDialogState extends State<ChangeAvatarDialog> {
               height: MediaQuery.of(context).size.height * 0.9,
               color: Colors.white,
               margin: const EdgeInsets.all(20),
-              child: orientation == Orientation.portrait
-                  ? _buildPortraitLayout(context, imageSize)
-                  : _buildLandscapeLayout(context, imageSize),
+              child:
+                  orientation == Orientation.portrait
+                      ? _buildPortraitLayout(imageSize)
+                      : _buildLandscapeLayout(imageSize),
             );
           },
         ),
@@ -112,7 +110,7 @@ class _ChangeAvatarDialogState extends State<ChangeAvatarDialog> {
     );
   }
 
-  Widget _buildLandscapeLayout(BuildContext context, double imageSize) {
+  Widget _buildLandscapeLayout(double imageSize) {
     return Row(
       children: [
         Expanded(
@@ -134,26 +132,32 @@ class _ChangeAvatarDialogState extends State<ChangeAvatarDialog> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   TextButton(
-                    onPressed: isLoadingChangeAvatar
-                        ? null
-                        : () => Navigator.pop(context, false), // Cancel: return false
+                    onPressed:
+                        isLoadingChangeAvatar
+                            ? null
+                            : () => Navigator.pop(
+                              context,
+                              false,
+                            ), // Cancel: return false
                     child: const Text('Cancel'),
                   ),
                   TextButton(
-                    onPressed: isLoadingChangeAvatar
-                        ? null
-                        : () async {
-                      try {
-                        Uint8List finalImage = imageCrop;
-                        if (imageCrop.lengthInBytes > maxSize) {
-                          finalImage = await _compressImage(imageCrop);
-                        }
-                        await widget.onSave(finalImage, defaultAvatar);
-                        Navigator.pop(context, true); // Success: return true
-                      } catch (e) {
-                        showToastMessage("Error saving avatar: $e");
-                      }
-                    },
+                    onPressed:
+                        isLoadingChangeAvatar
+                            ? null
+                            : () async {
+                              try {
+                                Uint8List finalImage = imageCrop;
+                                if (imageCrop.lengthInBytes > maxSize) {
+                                  finalImage = await _compressImage(imageCrop);
+                                }
+                                await widget.onSave(finalImage, defaultAvatar);
+                                if (!mounted) return;
+                                Navigator.pop(context, true);
+                              } catch (e) {
+                                showToastMessage("Error saving avatar: $e");
+                              }
+                            },
                     child: const Text('Save'),
                   ),
                 ],
@@ -165,7 +169,7 @@ class _ChangeAvatarDialogState extends State<ChangeAvatarDialog> {
     );
   }
 
-  Widget _buildPortraitLayout(BuildContext context, double imageSize) {
+  Widget _buildPortraitLayout(double imageSize) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -188,26 +192,29 @@ class _ChangeAvatarDialogState extends State<ChangeAvatarDialog> {
           mainAxisAlignment: MainAxisAlignment.end,
           children: [
             TextButton(
-              onPressed: isLoadingChangeAvatar
-                  ? null
-                  : () => Navigator.pop(context, false),
+              onPressed:
+                  isLoadingChangeAvatar
+                      ? null
+                      : () => Navigator.pop(context, false),
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: isLoadingChangeAvatar
-                  ? null
-                  : () async {
-                try {
-                  Uint8List finalImage = imageCrop;
-                  if (imageCrop.lengthInBytes > maxSize) {
-                    finalImage = await _compressImage(imageCrop);
-                  }
-                  await widget.onSave(finalImage, defaultAvatar);
-                  Navigator.pop(context, true);
-                } catch (e) {
-                  showToastMessage("Error saving avatar: $e");
-                }
-              },
+              onPressed:
+                  isLoadingChangeAvatar
+                      ? null
+                      : () async {
+                        try {
+                          Uint8List finalImage = imageCrop;
+                          if (imageCrop.lengthInBytes > maxSize) {
+                            finalImage = await _compressImage(imageCrop);
+                          }
+                          await widget.onSave(finalImage, defaultAvatar);
+                          if (!mounted) return;
+                          Navigator.pop(context, true);
+                        } catch (e) {
+                          showToastMessage("Error saving avatar: $e");
+                        }
+                      },
               child: const Text('Save'),
             ),
           ],
@@ -216,7 +223,11 @@ class _ChangeAvatarDialogState extends State<ChangeAvatarDialog> {
     );
   }
 
-  Widget _buildOriginalImageSection(BuildContext context, Uint8List imageMain, double imageSize) {
+  Widget _buildOriginalImageSection(
+    BuildContext context,
+    Uint8List imageMain,
+    double imageSize,
+  ) {
     return Column(
       children: [
         const Text('Original', style: TextStyle(fontSize: 16)),
@@ -228,7 +239,8 @@ class _ChangeAvatarDialogState extends State<ChangeAvatarDialog> {
             image: imageMain,
             controller: cropController,
             onStatusChanged: (status) {
-              isLoadingChangeAvatar = status == CropStatus.cropping || status == CropStatus.loading;
+              isLoadingChangeAvatar =
+                  status == CropStatus.cropping || status == CropStatus.loading;
               setState(() {});
             },
             onResize: updateImage,
@@ -239,7 +251,11 @@ class _ChangeAvatarDialogState extends State<ChangeAvatarDialog> {
     );
   }
 
-  Widget _buildPreviewImageSection(BuildContext context, Uint8List imageCrop, double imageSize) {
+  Widget _buildPreviewImageSection(
+    BuildContext context,
+    Uint8List imageCrop,
+    double imageSize,
+  ) {
     return Column(
       children: [
         const Text('Preview', style: TextStyle(fontSize: 16)),
@@ -265,54 +281,66 @@ class _ChangeAvatarDialogState extends State<ChangeAvatarDialog> {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         ElevatedButton(
-          onPressed: isLoadingChangeAvatar
-              ? null
-              : () async {
-            await showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              backgroundColor: Colors.white,
-              builder: (context) => SafeArea(
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      ListTile(
-                        leading: const Icon(Icons.photo_library),
-                        title: const Text('Pick from Gallery'),
-                        onTap: () async {
-                          Navigator.pop(context);
-                          final pickedFile = await ImagePicker().pickImage(source: ImageSource.gallery);
-                          if (pickedFile != null) {
-                            final imageBytes = await pickedFile.readAsBytes();
-                            updateImage(imageBytes);
-                          }
-                        },
-                      ),
-                      ListTile(
-                        leading: const Icon(Icons.camera_alt),
-                        title: const Text('Take a Photo'),
-                        onTap: () async {
-                          Navigator.pop(context);
-                          final resultAvatarBytes = await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const CameraPage(),
+          onPressed:
+              isLoadingChangeAvatar
+                  ? null
+                  : () async {
+                    await showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.white,
+                      builder:
+                          (context) => SafeArea(
+                            child: Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 10,
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  ListTile(
+                                    leading: const Icon(Icons.photo_library),
+                                    title: const Text('Pick from Gallery'),
+                                    onTap: () async {
+                                      Navigator.pop(context);
+                                      final pickedFile = await ImagePicker()
+                                          .pickImage(
+                                            source: ImageSource.gallery,
+                                          );
+                                      if (pickedFile != null) {
+                                        final imageBytes =
+                                            await pickedFile.readAsBytes();
+                                        updateImage(imageBytes);
+                                      }
+                                    },
+                                  ),
+                                  ListTile(
+                                    leading: const Icon(Icons.camera_alt),
+                                    title: const Text('Take a Photo'),
+                                    onTap: () async {
+                                      Navigator.pop(context);
+                                      final resultAvatarBytes =
+                                          await Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder:
+                                                  (context) =>
+                                                      const CameraPage(),
+                                            ),
+                                          );
+                                      if (resultAvatarBytes != null) {
+                                        updateImage(resultAvatarBytes);
+                                      }
+                                    },
+                                  ),
+                                ],
+                              ),
                             ),
-                          );
-                          if (resultAvatarBytes != null) {
-                            updateImage(resultAvatarBytes);
-                          }
-                        },
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
+                          ),
+                    );
+                  },
           child: const Text('Upload New'),
         ),
         if (!defaultAvatar) _buildResetDefaultButton(),
@@ -322,17 +350,22 @@ class _ChangeAvatarDialogState extends State<ChangeAvatarDialog> {
 
   Widget _buildResetDefaultButton() {
     return ElevatedButton(
-      onPressed: isLoadingChangeAvatar
-          ? null
-          : () async {
-        try {
-          Uint8List defaultAvatarImage = await AuthSettings().getAvatar(true);
-          updateImage(defaultAvatarImage);
-          defaultAvatar = true;
-        } catch (e) {
-          showToastMessage("Failed to load default avatar: ${e.toString()}");
-        }
-      },
+      onPressed:
+          isLoadingChangeAvatar
+              ? null
+              : () async {
+                try {
+                  Uint8List defaultAvatarImage = await AuthSettings().getAvatar(
+                    true,
+                  );
+                  updateImage(defaultAvatarImage);
+                  defaultAvatar = true;
+                } catch (e) {
+                  showToastMessage(
+                    "Failed to load default avatar: ${e.toString()}",
+                  );
+                }
+              },
       child: const Text('Reset default'),
     );
   }

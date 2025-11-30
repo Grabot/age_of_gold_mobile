@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 
 class ChangeUsernameDialog {
   static void showChangeUsernameDialog(
-      BuildContext context, {
-        required String currentUsername,
-        required Function(String) onSave,
-        required bool isLoading,
-      }) {
+    BuildContext context, {
+    required String currentUsername,
+    required Function(String) onSave,
+    required bool isLoading,
+  }) {
     final usernameController = TextEditingController(text: currentUsername);
     final formKey = GlobalKey<FormState>();
     showDialog(
@@ -39,14 +39,15 @@ class ChangeUsernameDialog {
               child: const Text('Cancel'),
             ),
             TextButton(
-              onPressed: isLoading
-                  ? null
-                  : () {
-                if (formKey.currentState!.validate()) {
-                  Navigator.pop(context);
-                  onSave(usernameController.text);
-                }
-              },
+              onPressed:
+                  isLoading
+                      ? null
+                      : () {
+                        if (formKey.currentState!.validate()) {
+                          Navigator.pop(context);
+                          onSave(usernameController.text);
+                        }
+                      },
               child: const Text('Save'),
             ),
           ],

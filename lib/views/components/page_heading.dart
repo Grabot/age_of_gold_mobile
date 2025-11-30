@@ -12,9 +12,9 @@ class PageHeading extends StatelessWidget {
       child: Text(
         title,
         style: const TextStyle(
-            fontSize: 30,
-            fontWeight: FontWeight.bold,
-            fontFamily: 'NotoSerif'
+          fontSize: 30,
+          fontWeight: FontWeight.bold,
+          fontFamily: 'NotoSerif',
         ),
       ),
     );
