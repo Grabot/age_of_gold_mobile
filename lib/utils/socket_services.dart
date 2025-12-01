@@ -27,7 +27,7 @@ class SocketServices extends ChangeNotifier {
   }
 
   startSockConnection() {
-    String socketUrl = dotenv.env['BASEURL'] ?? "";
+    String socketUrl = dotenv.env['BASE_URL'] ?? "";
     socket = io.io(socketUrl, <String, dynamic>{
       'autoConnect': true,
       'path': "/socket.io",

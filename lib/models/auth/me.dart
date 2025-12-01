@@ -5,7 +5,7 @@ import '../../utils/storage.dart';
 
 class Me {
   late User user;
-  final bool origin;
+  final int origin;
   final bool avatarDefault;
 
   Me({required this.user, required this.origin, this.avatarDefault = true});
@@ -23,7 +23,7 @@ class Me {
   factory Me.fromJson(Map<String, dynamic> json) {
     return Me(
       user: User.fromJson(json['user']),
-      origin: json['origin'] as bool,
+      origin: json['origin'],
       avatarDefault: json['avatarDefault'] as bool? ?? true,
     );
   }
@@ -32,7 +32,7 @@ class Me {
     return {
       'id': user.id,
       'username': user.username,
-      'origin': origin ? 1 : 0,
+      'origin': origin,
       'avatarDefault': avatarDefault ? 1 : 0,
       'avatarPath': user.avatarPath,
     };
@@ -41,7 +41,7 @@ class Me {
   factory Me.fromMap(Map<String, dynamic> map) {
     return Me(
       user: User.fromMap(map),
-      origin: map['origin'] == 1,
+      origin: map['origin'],
       avatarDefault: map['avatarDefault'] == 1,
       // avatarBytes: map['avatarBytes'] as Uint8List?,
     );

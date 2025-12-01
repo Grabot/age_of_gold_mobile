@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 import 'package:dio/dio.dart';
+import '../../models/services/basic_response.dart';
 import '../../models/services/sign_in_request.dart';
 import '../../models/services/login_response.dart';
 import '../../models/services/sign_up_request.dart';
@@ -103,6 +104,49 @@ class AuthLogin {
         );
       }
       return loginResponse;
+    } on DioException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  Future<LoginResponse> loginGoogleToken(String accessToken) async {
+    try {
+      final response = await CleanApi().dio.post(
+        "${dotenv.env['API_VERSION']}/auth/google/token",
+        options: Options(
+          headers: {HttpHeaders.contentTypeHeader: "application/json"},
+        ),
+        data: jsonEncode(<String, String>{
+          "access_token": accessToken,
+        }),
+      );
+      final loginResponse = LoginResponse.fromJson(response.data);
+      if (loginResponse.accessToken == null ||
+          loginResponse.refreshToken == null) {
+        throw UnauthorizedException(
+          response.requestOptions,
+          "Invalid login response",
+        );
+      }
+      return loginResponse;
+    } on DioException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  Future<BasicResponse> logout() async {
+    try {
+      final response = await AuthApi().dio.post(
+        "${dotenv.env['API_VERSION']}/logout",
+        options: Options(
+          headers: {HttpHeaders.contentTypeHeader: "application/json"},
+        ),
+      );
+      final basicResponse = BasicResponse.fromJson(response.data);
+      if (basicResponse.success == null || basicResponse.success == false) {
+        throw Exception("Couldn't logout");
+      }
+      return basicResponse;
     } on DioException catch (e) {
       throw Exception(e.message);
     }

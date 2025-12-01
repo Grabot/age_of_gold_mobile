@@ -215,8 +215,11 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
-    LogoutDialog.showLogoutDialog(context);
+  Future<void> _showLogoutDialog(BuildContext context) async {
+    await showDialog<void>(
+      context: context,
+      builder: (BuildContext context) => const LogoutDialog(),
+    );
   }
 
   void updateUsername(String newUsername) async {

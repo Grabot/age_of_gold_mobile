@@ -49,7 +49,7 @@ class AppInterceptors extends Interceptor {
               accessToken,
               refreshToken,
             );
-            await AuthStore().successfulLogin(loginResponse);
+            await AuthStore().successfulLogin(loginResponse, null);
             accessToken = await secureStorage.getAccessToken();
             for (var request in _requestQueue) {
               request();
@@ -82,7 +82,6 @@ class AppInterceptors extends Interceptor {
           return;
         }
       }
-
       options.headers['Authorization'] = 'Bearer $accessToken';
       return handler.next(options);
     } catch (e) {
@@ -109,7 +108,7 @@ class AppInterceptors extends Interceptor {
                 accessToken,
                 refreshToken,
               );
-              await AuthStore().successfulLogin(loginResponse);
+              await AuthStore().successfulLogin(loginResponse, null);
               // Retry the original request with the new token
               final options = err.requestOptions;
               options.headers['Authorization'] =

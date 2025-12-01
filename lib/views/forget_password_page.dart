@@ -4,7 +4,7 @@ import 'components/custom_form_button.dart';
 import 'components/custom_input_field.dart';
 import 'components/page_header.dart';
 import 'components/page_heading.dart';
-import 'sign_in_page.dart';
+import 'login/auth_page.dart';
 
 class ForgetPasswordPage extends StatefulWidget {
   const ForgetPasswordPage({super.key});
@@ -69,7 +69,7 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
                                       context,
                                       MaterialPageRoute(
                                         builder:
-                                            (context) => const SignInPage(),
+                                            (context) => const AuthPage(),
                                       ),
                                     ),
                                   },

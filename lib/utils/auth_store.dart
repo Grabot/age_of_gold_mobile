@@ -37,7 +37,7 @@ class AuthStore {
     _me = me;
   }
 
-  Future<bool> getUserDetails(LoginResponse loginResponse) async {
+  Future<bool> getUserDetails(LoginResponse loginResponse, int? origin) async {
     try {
       UserResponse userResponse = await AuthSettings().getUserDetails();
       User user = User(id: userResponse.id!, username: userResponse.username!);
@@ -47,7 +47,7 @@ class AuthStore {
         await Storage().clearMe();
         SecureStorage().clearMe();
       }
-      Me me = Me(user: user, origin: true, avatarDefault: false);
+      Me me = Me(user: user, origin: 0, avatarDefault: false);
       if (oldMe != null) {
         // keep the old avatar path since it is probably unchanged.
         // If it is not it will detect this later
@@ -75,7 +75,7 @@ class AuthStore {
     navigationService.navigateTo(routes.signInRoute);
   }
 
-  successfulLogin(LoginResponse loginResponse) async {
+  successfulLogin(LoginResponse loginResponse, int? origin) async {
     if (loginResponse.accessToken == null ||
         loginResponse.refreshToken == null) {
       throw Exception("Invalid login response: missing tokens");
@@ -91,7 +91,7 @@ class AuthStore {
 
     int profileVersion = await secureStorage.getProfileVersion();
     if (profileVersion != loginResponse.profileVersion) {
-      if (!await getUserDetails(loginResponse)) {
+      if (!await getUserDetails(loginResponse, origin)) {
         unsuccessfulLogin();
       }
     } else {
@@ -99,7 +99,7 @@ class AuthStore {
       Me? me = await Storage().getMe();
       if (me == null) {
         // User not found, let's try to retrieve it anyway
-        if (!await getUserDetails(loginResponse)) {
+        if (!await getUserDetails(loginResponse, origin)) {
           unsuccessfulLogin();
         }
       }

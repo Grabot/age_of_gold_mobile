@@ -14,7 +14,7 @@ class AuthApi {
   static Dio createDio() {
     var dio = Dio(
       BaseOptions(
-        baseUrl: dotenv.env['BASEURL'] ?? "",
+        baseUrl: dotenv.env['BASE_URL'] ?? "",
         receiveTimeout: const Duration(seconds: 10),
         connectTimeout: const Duration(seconds: 10),
         sendTimeout: const Duration(seconds: 10),
@@ -36,7 +36,7 @@ class CleanApi {
   static Dio createDio() {
     return Dio(
       BaseOptions(
-        baseUrl: dotenv.env['BASEURL'] ?? "",
+        baseUrl: dotenv.env['BASE_URL'] ?? "",
         receiveTimeout: const Duration(seconds: 10),
         connectTimeout: const Duration(seconds: 10),
         sendTimeout: const Duration(seconds: 10),

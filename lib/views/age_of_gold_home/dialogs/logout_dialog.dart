@@ -1,37 +1,85 @@
-import 'package:flutter/material.dart';
+import 'package:age_of_gold_mobile/services/auth/auth_login.dart';
+import 'package:age_of_gold_mobile/utils/auth_store.dart';
 import 'package:age_of_gold_mobile/utils/secure_storage.dart';
-import 'package:age_of_gold_mobile/views/sign_in_page.dart';
+import 'package:flutter/material.dart';
 
-class LogoutDialog {
-  static void showLogoutDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Logout'),
-          content: const Text('Are you sure you want to logout?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                SecureStorage().clearTokens();
-                Navigator.of(context).pop();
-                ScaffoldMessenger.of(
-                  context,
-                ).showSnackBar(const SnackBar(content: Text('Logged out!')));
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => const SignInPage()),
-                );
-              },
-              child: const Text('Logout', style: TextStyle(color: Colors.red)),
-            ),
-          ],
+import '../../login/auth_page.dart';
+import '../../login/service/google_sign_in_service.dart';
+
+class LogoutDialog extends StatefulWidget {
+
+  const LogoutDialog({super.key});
+
+  @override
+  LogoutDialogState createState() => LogoutDialogState();
+}
+
+class LogoutDialogState extends State<LogoutDialog> {
+  bool _isLoading = false;
+
+  Future<void> _handleLogout() async {
+    setState(() => _isLoading = true);
+    try {
+      if (AuthStore().me.origin == 1) {
+        await GoogleSignInService().signOut();
+      }
+      print("Logged out!");
+      await AuthLogin().logout();
+      await SecureStorage().clearTokens();
+      print("Logged out 2!");
+      if (mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Logged out!')),
         );
-      },
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const AuthPage()),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        // When it fails we still want to clear the tokens.
+        // It would still count as a successful logout
+        await SecureStorage().clearTokens();
+        if (!mounted) return;
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Logged out!')),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const AuthPage()),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: const Text('Logout'),
+      content: const Text('Are you sure you want to logout?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: _isLoading ? null : _handleLogout,
+          child: _isLoading
+              ? const SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          )
+              : const Text('Logout', style: TextStyle(color: Colors.red)),
+        ),
+      ],
     );
   }
 }

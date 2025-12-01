@@ -11,7 +11,6 @@ import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class ChangeAvatarDialog extends StatefulWidget {
   final Function(Uint8List, bool) onSave;
-  final int maxSize = 2 * 1024 * 1024;
 
   const ChangeAvatarDialog({super.key, required this.onSave});
 

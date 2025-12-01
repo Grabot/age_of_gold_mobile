@@ -1,8 +1,6 @@
 import 'package:age_of_gold_mobile/services/auth/auth_login.dart';
 import 'package:age_of_gold_mobile/utils/auth_store.dart';
-import 'package:age_of_gold_mobile/views/sign_in_page.dart';
 import 'package:flutter/material.dart';
-import 'package:age_of_gold_mobile/views/sign_up_page.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../models/services/login_response.dart';
 import '../services/auth/app_interceptors.dart';
@@ -13,6 +11,8 @@ import 'age_of_gold_home/age_of_gold_home.dart';
 import 'components/custom_form_button.dart';
 import 'components/page_header.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+import 'login/auth_page.dart';
 
 class OpeningScreen extends StatefulWidget {
   const OpeningScreen({super.key});
@@ -204,7 +204,7 @@ class _OpeningScreenState extends State<OpeningScreen> {
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => SignUpPage(key: UniqueKey())),
+        MaterialPageRoute(builder: (context) => AuthPage(key: UniqueKey(), showSignUp: true)),
       );
     }
   }
@@ -213,7 +213,7 @@ class _OpeningScreenState extends State<OpeningScreen> {
     if (!mounted) return;
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => SignInPage(key: UniqueKey())),
+      MaterialPageRoute(builder: (context) => AuthPage(key: UniqueKey())),
     );
   }
 
@@ -233,7 +233,7 @@ class _OpeningScreenState extends State<OpeningScreen> {
           context,
         ).showSnackBar(const SnackBar(content: Text('Sign in successful!')));
 
-        await AuthStore().successfulLogin(loginResponse);
+        await AuthStore().successfulLogin(loginResponse, null);
 
         if (!mounted) return;
         Navigator.pushReplacement(
