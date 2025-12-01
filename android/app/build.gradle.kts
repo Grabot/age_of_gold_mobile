@@ -19,7 +19,7 @@ val keystoreProperties = Properties().apply {
 }
 
 android {
-    namespace = "mobile.age.of.gold.age_of_gold_mobile"
+    namespace = "gold.ageof.age_of_gold_mobile"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = flutter.ndkVersion
 
@@ -34,7 +34,7 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId = "mobile.age.of.gold.age_of_gold_mobile"
+        applicationId = "gold.ageof.age_of_gold_mobile"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion

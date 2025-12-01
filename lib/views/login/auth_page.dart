@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
+import '../../auth/app_interceptors.dart';
+import '../../auth/auth_login.dart';
 import '../../models/services/login_response.dart';
 import '../../models/services/sign_in_request.dart';
 import '../../models/services/sign_up_request.dart';
-import '../../services/auth/app_interceptors.dart';
-import '../../services/auth/auth_login.dart';
 import '../../utils/auth_store.dart';
 import '../../utils/utils.dart';
 import '../components/custom_form_button.dart';

@@ -1,15 +1,15 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:age_of_gold_mobile/models/services/user_response.dart';
-import 'package:age_of_gold_mobile/services/auth/auth_settings.dart';
 import 'package:age_of_gold_mobile/utils/secure_storage.dart';
 import 'package:age_of_gold_mobile/utils/storage.dart';
 import 'package:age_of_gold_mobile/utils/utils.dart';
 import 'package:jwt_decode/jwt_decode.dart';
+import '../auth/app_interceptors.dart';
+import '../auth/auth_settings.dart';
 import '../models/auth/me.dart';
 import '../models/auth/user.dart';
 import '../models/services/login_response.dart';
-import '../services/auth/app_interceptors.dart';
 import 'package:age_of_gold_mobile/constants/route_paths.dart' as routes;
 import 'navigation_service.dart';
 import 'package:path_provider/path_provider.dart';

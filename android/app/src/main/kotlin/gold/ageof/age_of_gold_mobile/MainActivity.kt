@@ -1,4 +1,4 @@
-package mobile.age.of.gold.age_of_gold_mobile
+package gold.ageof.age_of_gold_mobile
 
 import io.flutter.embedding.android.FlutterActivity
 

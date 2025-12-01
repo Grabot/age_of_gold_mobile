@@ -1,8 +1,8 @@
-import 'package:age_of_gold_mobile/services/auth/auth_login.dart';
 import 'package:age_of_gold_mobile/utils/auth_store.dart';
 import 'package:age_of_gold_mobile/utils/secure_storage.dart';
 import 'package:flutter/material.dart';
 
+import '../../../auth/auth_login.dart';
 import '../../login/auth_page.dart';
 import '../../login/service/google_sign_in_service.dart';
 
@@ -23,10 +23,8 @@ class LogoutDialogState extends State<LogoutDialog> {
       if (AuthStore().me.origin == 1) {
         await GoogleSignInService().signOut();
       }
-      print("Logged out!");
       await AuthLogin().logout();
       await SecureStorage().clearTokens();
-      print("Logged out 2!");
       if (mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(

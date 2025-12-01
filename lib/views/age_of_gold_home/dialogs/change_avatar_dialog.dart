@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:age_of_gold_mobile/utils/auth_store.dart';
 import 'package:age_of_gold_mobile/utils/utils.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../../services/auth/auth_settings.dart';
+import '../../../auth/auth_settings.dart';
 import '../../../utils/crop/controller.dart';
 import '../../../utils/crop/crop.dart';
 import '../camera_page.dart';

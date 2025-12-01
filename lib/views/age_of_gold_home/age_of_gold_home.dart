@@ -1,11 +1,10 @@
 import 'dart:typed_data';
-
-import 'package:age_of_gold_mobile/services/auth/auth_settings.dart';
 import 'package:age_of_gold_mobile/utils/secure_storage.dart';
 import 'package:age_of_gold_mobile/views/age_of_gold_home/dialogs/change_username_dialog.dart';
 import 'package:age_of_gold_mobile/views/age_of_gold_home/dialogs/logout_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:age_of_gold_mobile/utils/auth_store.dart';
+import '../../auth/auth_settings.dart';
 import '../../utils/utils.dart';
 import 'dialogs/change_avatar_dialog.dart';
 

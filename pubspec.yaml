@@ -52,11 +52,11 @@ dependencies:
   image: ^4.5.4
   camerawesome: ^2.5.0
   flutter_image_compress: ^2.4.0
-  flutter_native_splash: ^2.4.7
   path: ^1.9.1
   webview_flutter: ^4.10.0
   sign_in_with_apple: ^7.0.1
   google_sign_in: ^7.2.0
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
@@ -64,6 +64,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.14.4
+  flutter_native_splash: ^2.4.7
 
 
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -73,6 +75,15 @@ dev_dependencies:
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
 
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  remove_alpha_ios: true
+  image_path_android: "assets/images/gold_placeholder.png"
+  image_path_ios: "assets/images/gold_placeholder.png"
+  adaptive_icon_background: "assets/images/gold_placeholder.png"
+  adaptive_icon_foreground: "assets/images/gold_placeholder.png"
+  min_sdk_android: 21
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

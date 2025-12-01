@@ -1,10 +1,9 @@
-import 'package:age_of_gold_mobile/services/auth/auth_login.dart';
 import 'package:flutter/material.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-
-import '../../../services/auth/app_interceptors.dart';
+import '../../../auth/app_interceptors.dart';
+import '../../../auth/auth_login.dart';
 import '../../../utils/auth_store.dart';
 import '../../../utils/secure_storage.dart';
 import '../../../utils/utils.dart';

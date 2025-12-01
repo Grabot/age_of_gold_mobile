@@ -1,9 +1,9 @@
-import 'package:age_of_gold_mobile/services/auth/auth_login.dart';
 import 'package:age_of_gold_mobile/utils/auth_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import '../auth/app_interceptors.dart';
+import '../auth/auth_login.dart';
 import '../models/services/login_response.dart';
-import '../services/auth/app_interceptors.dart';
 import '../utils/secure_storage.dart';
 import '../utils/shared.dart';
 import '../utils/utils.dart';
