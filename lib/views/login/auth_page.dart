@@ -428,10 +428,9 @@ class _AuthPageState extends State<AuthPage> {
     final credential = await SignInWithApple.getAppleIDCredential(
       scopes: [
         AppleIDAuthorizationScopes.email,
-        AppleIDAuthorizationScopes.fullName,
       ],
     );
 
-    print(credential);
+    print(credential.identityToken);
   }
 }

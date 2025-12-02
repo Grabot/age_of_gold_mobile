@@ -68,3 +68,4 @@ To change the app name you have to update the `name` field in the pubspec.yaml. 
    - Run `signingReport` with gradlew on the Android project and look for the DebugAndroidTest of the project
 9. Create a new oauth credential for iOS specific
 10. fill in the correct bundle id and App id that you can find in the apple overview
+11. Add the sign in with apple in the singing and capabilities (as a capability) in xcode.
