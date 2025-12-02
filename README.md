@@ -32,20 +32,11 @@ To change the app name you have to update the `name` field in the pubspec.yaml. 
 2. Fill in the name
 3. Fill in the redirect uri
 
-#### Google
-
-1. Go to https://console.cloud.google.com/apis/credentials
-2. Click on the create credentials button
-3. Select OAuth client ID
-4. Select Web application
-5. Give the origins and the redirect uris
-6. Click on create
-
 #### Apple
 
+0. Make sure you have an app id created on https://appstoreconnect.apple.com/. To be sure you can upload an initial placeholder app to the store to ensure that it is all correct.
 1. Go to https://developer.apple.com/account/resources/identifiers/list/serviceId
-2. Select App IDs
-3. Click on the create button
+2. Select App ID of the app you want to use
 4. Select Sign in with Apple
 5. Click on continue
 6. Register
@@ -55,3 +46,16 @@ To change the app name you have to update the `name` field in the pubspec.yaml. 
 10. Define the Domain and the return urls
 11. Click on continue
 12. Register
+
+#### Google
+
+1. Go to https://console.cloud.google.com/apis/credentials
+2. Click on the create credentials button
+3. Select OAuth client ID
+4. Select Web application
+5. Give the origins and the redirect uris
+6. Click on create
+7. Create a new oauth credential for Android specific
+8. fill in the correct package name and the sha1 key
+9. Create a new oauth credential for iOS specific
+10. fill in the correct bundle id and App id that you can find in the apple overview
