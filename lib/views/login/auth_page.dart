@@ -449,5 +449,4 @@ class _AuthPageState extends State<AuthPage> {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Google login failed.')));
     }
   }
-  }
 }
