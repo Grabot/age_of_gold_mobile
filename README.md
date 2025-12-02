@@ -16,6 +16,15 @@ Similarly you can update the splash screen to be more in line with your project 
 
 To change the app name you have to update the `name` field in the pubspec.yaml. Change the `android:label` field in the AndroidManifest.xml and the `<key>CFBundleDisplayName</key>` in the info.plist
 
+### Create the app bundle id on the apple appstore
+
+1. Go to https://appstoreconnect.apple.com/
+2. Go to My Apps
+3. Click on the + button
+4. Fill in the app
+5. Click on create
+6. Ensure that the bundle id is correct. Try to push a placeholder app to the store (without reviewing it)
+
 ### Create the oauth2 logging clients
 
 #### Reddit
@@ -34,7 +43,6 @@ To change the app name you have to update the `name` field in the pubspec.yaml. 
 
 #### Apple
 
-0. Make sure you have an app id created on https://appstoreconnect.apple.com/. To be sure you can upload an initial placeholder app to the store to ensure that it is all correct.
 1. Go to https://developer.apple.com/account/resources/identifiers/list/serviceId
 2. Select App ID of the app you want to use
 4. Select Sign in with Apple
@@ -57,5 +65,6 @@ To change the app name you have to update the `name` field in the pubspec.yaml. 
 6. Click on create
 7. Create a new oauth credential for Android specific
 8. fill in the correct package name and the sha1 key
+   - Run `signingReport` with gradlew on the Android project and look for the DebugAndroidTest of the project
 9. Create a new oauth credential for iOS specific
 10. fill in the correct bundle id and App id that you can find in the apple overview

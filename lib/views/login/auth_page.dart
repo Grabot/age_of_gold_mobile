@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
+import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../../auth/app_interceptors.dart';
 import '../../auth/auth_login.dart';
 import '../../models/services/login_response.dart';
@@ -371,7 +374,11 @@ class _AuthPageState extends State<AuthPage> {
         await _handleGoogleSignIn();
         return;
       } else if (provider == "apple") {
-        await _showOAuthWebviewDialog(Uri.parse("https://ageof.gold/api/v1.0/auth/apple"));
+        if (Platform.isIOS) {
+          await _handleAppleSignIn();
+        } else {
+          await _showOAuthWebviewDialog(Uri.parse("https://ageof.gold/api/v1.0/auth/apple"));
+        }
         return;
       }
     } catch (exception) {
@@ -415,5 +422,16 @@ class _AuthPageState extends State<AuthPage> {
       print(exception.toString());
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Google login failed.')));
     }
+  }
+
+  Future<void> _handleAppleSignIn() async {
+    final credential = await SignInWithApple.getAppleIDCredential(
+      scopes: [
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
+      ],
+    );
+
+    print(credential);
   }
 }
