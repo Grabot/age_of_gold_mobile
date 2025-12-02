@@ -436,7 +436,7 @@ class _AuthPageState extends State<AuthPage> {
       if (credential.identityToken == null) {
         throw Exception('No identity token');
       }
-      LoginResponse loginResponse = await AuthLogin().loginGoogleToken(credential.identityToken!);
+      LoginResponse loginResponse = await AuthLogin().loginAppleToken(credential.identityToken!);
       await AuthStore().successfulLogin(loginResponse, 4);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sign in successful!')));
