@@ -134,6 +134,31 @@ class AuthLogin {
     }
   }
 
+  Future<LoginResponse> loginAppleToken(String accessToken) async {
+    try {
+      final response = await CleanApi().dio.post(
+        "${dotenv.env['API_VERSION']}/auth/apple/token",
+        options: Options(
+          headers: {HttpHeaders.contentTypeHeader: "application/json"},
+        ),
+        data: jsonEncode(<String, String>{
+          "access_token": accessToken,
+        }),
+      );
+      final loginResponse = LoginResponse.fromJson(response.data);
+      if (loginResponse.accessToken == null ||
+          loginResponse.refreshToken == null) {
+        throw UnauthorizedException(
+          response.requestOptions,
+          "Invalid login response",
+        );
+      }
+      return loginResponse;
+    } on DioException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
   Future<BasicResponse> logout() async {
     try {
       final response = await AuthApi().dio.post(

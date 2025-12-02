@@ -425,12 +425,29 @@ class _AuthPageState extends State<AuthPage> {
   }
 
   Future<void> _handleAppleSignIn() async {
-    final credential = await SignInWithApple.getAppleIDCredential(
-      scopes: [
-        AppleIDAuthorizationScopes.email,
-      ],
-    );
+    try {
+      final credential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+        ],
+      );
 
-    print(credential.identityToken);
+      print(credential.identityToken);
+      if (credential.identityToken == null) {
+        throw Exception('No identity token');
+      }
+      LoginResponse loginResponse = await AuthLogin().loginGoogleToken(credential.identityToken!);
+      await AuthStore().successfulLogin(loginResponse, 4);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sign in successful!')));
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const AgeOfGoldHome()),
+      );
+    } catch (exception) {
+      print(exception.toString());
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Google login failed.')));
+    }
+  }
   }
 }
