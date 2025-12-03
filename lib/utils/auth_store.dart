@@ -1,7 +1,9 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:age_of_gold_mobile/auth/auth_login.dart';
 import 'package:age_of_gold_mobile/models/services/user_response.dart';
 import 'package:age_of_gold_mobile/utils/secure_storage.dart';
+import 'package:age_of_gold_mobile/utils/socket_services.dart';
 import 'package:age_of_gold_mobile/utils/storage.dart';
 import 'package:age_of_gold_mobile/utils/utils.dart';
 import 'package:jwt_decode/jwt_decode.dart';
@@ -110,6 +112,8 @@ class AuthStore {
     if (_me == null) {
       throw Exception("User not found.");
     }
+    print("successful login!");
+    SocketServices socketServices = SocketServices();
 
     int avatarVersion = await secureStorage.getAvatarVersion();
     if (avatarVersion != loginResponse.avatarVersion) {
@@ -134,6 +138,17 @@ class AuthStore {
     await secureStorage.setLastValidation(validationTimestamp);
   }
 
+  isValidationNeeded() async {
+    int lastValidated = await SecureStorage().getLastValidation();
+    int now = DateTime.now().millisecondsSinceEpoch;
+    int oneMinute = 60 * 1000;
+    if (now - lastValidated > oneMinute) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   saveNewAvatar(Uint8List avatarBytes) async {
     final appDir = await getApplicationDocumentsDirectory();
     final avatarFile = File('${appDir.path}/avatar_${AuthStore().me.id}.png');
@@ -142,5 +157,23 @@ class AuthStore {
     _me!.user.avatar = avatarBytes;
     await _me!.save();
     await SecureStorage().setShouldUpdateAvatar(false);
+  }
+
+  validateToken() async {
+    if (_me == null) {
+      // No user logged in.
+      return;
+    }
+    String? accessToken = await SecureStorage().getAccessToken();
+    if (accessToken == null) {
+      // No token saved.
+      return;
+    }
+    try {
+      LoginResponse loginResponse = await AuthLogin().loginToken();
+      successfulLogin(loginResponse, null);
+    } catch (e) {
+      throw Exception("Token login failed.");
+    }
   }
 }

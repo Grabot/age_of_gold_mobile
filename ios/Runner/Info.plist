@@ -53,6 +53,14 @@
 			<string>UIInterfaceOrientationLandscapeLeft</string>
 			<string>UIInterfaceOrientationLandscapeRight</string>
 		</array>
+		<key>NSPhotoLibraryUsageDescription</key>
+        <string>This app needs access to the photo library to find the best photo to send to your friends or to set as your avatar or group avatar</string>
+        <key>NSPhotoLibraryAddUsageDescription</key>
+        <string>This app needs access to the photo library to find the best photo to send to your friends or to set as your avatar or group avatar</string>
+        <key>NSCameraUsageDescription</key>
+        <string>This app uses the camera to create photos and videos that you can send to your friends or set as your avatar or group avatar.</string>
+        <key>NSMicrophoneUsageDescription</key>
+        <string>You can record audio and send it to your friends and this app uses the camera to create videos that you can send to your friends. The video will be recorded with audio.</string>
 		<key>CADisableMinimumFrameDurationOnPhone</key>
 		<true/>
 		<key>UIApplicationSupportsIndirectInputEvents</key>

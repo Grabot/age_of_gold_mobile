@@ -1,4 +1,5 @@
 import 'package:age_of_gold_mobile/utils/navigation_service.dart';
+import 'package:age_of_gold_mobile/views/life_cycle.dart';
 import 'package:age_of_gold_mobile/views/opening_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:oktoast/oktoast.dart';
@@ -8,7 +9,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   setupLocator();
-  runApp(OKToast(child: const AgeOfGold()));
+  runApp(OKToast(child: LifeCycle(child: AgeOfGold())));
 }
 
 class AgeOfGold extends StatelessWidget {

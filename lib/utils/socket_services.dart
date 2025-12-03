@@ -22,13 +22,12 @@ class SocketServices extends ChangeNotifier {
   void startSocketConnection() {
     if (!socket.connected) {
       socket.connect();
-      joinRooms(AuthStore().me);
     }
+    joinRooms(AuthStore().me);
   }
 
   startSockConnection() {
-    String socketUrl = dotenv.env['BASE_URL'] ?? "";
-    socket = io.io(socketUrl, <String, dynamic>{
+    socket = io.io(dotenv.env['BASE_URL'], <String, dynamic>{
       'autoConnect': true,
       'path': "/socket.io",
       'transports': ['websocket'],
