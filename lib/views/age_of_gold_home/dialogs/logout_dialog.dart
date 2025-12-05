@@ -7,7 +7,6 @@ import '../../login/auth_page.dart';
 import '../../login/service/google_sign_in_service.dart';
 
 class LogoutDialog extends StatefulWidget {
-
   const LogoutDialog({super.key});
 
   @override
@@ -27,9 +26,9 @@ class LogoutDialogState extends State<LogoutDialog> {
       await SecureStorage().clearTokens();
       if (mounted) {
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Logged out!')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Logged out!')));
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const AuthPage()),
@@ -42,9 +41,9 @@ class LogoutDialogState extends State<LogoutDialog> {
         await SecureStorage().clearTokens();
         if (!mounted) return;
         Navigator.of(context).pop();
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Logged out!')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Logged out!')));
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (context) => const AuthPage()),
@@ -69,13 +68,14 @@ class LogoutDialogState extends State<LogoutDialog> {
         ),
         TextButton(
           onPressed: _isLoading ? null : _handleLogout,
-          child: _isLoading
-              ? const SizedBox(
-            width: 20,
-            height: 20,
-            child: CircularProgressIndicator(strokeWidth: 2),
-          )
-              : const Text('Logout', style: TextStyle(color: Colors.red)),
+          child:
+              _isLoading
+                  ? const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                  : const Text('Logout', style: TextStyle(color: Colors.red)),
         ),
       ],
     );

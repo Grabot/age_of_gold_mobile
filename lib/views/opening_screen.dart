@@ -204,7 +204,9 @@ class _OpeningScreenState extends State<OpeningScreen> {
       if (!mounted) return;
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => AuthPage(key: UniqueKey(), showSignUp: true)),
+        MaterialPageRoute(
+          builder: (context) => AuthPage(key: UniqueKey(), showSignUp: true),
+        ),
       );
     }
   }
@@ -242,6 +244,7 @@ class _OpeningScreenState extends State<OpeningScreen> {
         );
       } catch (e) {
         if (!mounted) return;
+        SecureStorage().clearTokens();
         String errorMessage = "Sign in failed. Please try again.";
         if (e is AppException) {
           if (e.message != null) {

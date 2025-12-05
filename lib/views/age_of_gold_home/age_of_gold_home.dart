@@ -7,6 +7,7 @@ import 'package:age_of_gold_mobile/utils/auth_store.dart';
 import '../../auth/auth_settings.dart';
 import '../../utils/utils.dart';
 import 'dialogs/change_avatar_dialog.dart';
+import 'dialogs/change_password_dialog.dart';
 
 class AgeOfGoldHome extends StatefulWidget {
   const AgeOfGoldHome({super.key});
@@ -99,6 +100,8 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
                     _showLogoutDialog(context);
                   } else if (value == 'change_username') {
                     _showChangeUsernameDialog(context);
+                  } else if (value == "change_password") {
+                    _showChangePasswordDialog(context);
                   } else if (value == 'change_avatar') {
                     _showChangeAvatarDialog(context).then((avatarChanged) {
                       if (mounted && avatarChanged) {
@@ -121,6 +124,10 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
               const PopupMenuItem<String>(
                 value: 'change_avatar',
                 child: Text('Change Avatar'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'change_password',
+                child: Text('Change Password'),
               ),
               const PopupMenuItem<String>(
                 value: 'logout',
@@ -221,6 +228,24 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
     );
   }
 
+  void updatePassword(String newPassword) async {
+    try {
+      await AuthSettings().updatePassword(newPassword);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password updated successfully!')),
+      );
+    } catch (e) {
+      showToastMessage('Failed to update password');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
   void updateUsername(String newUsername) async {
     try {
       await AuthSettings().updateUsername(newUsername);
@@ -252,6 +277,19 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
           _isLoading = true;
         });
         updateUsername(newUsername);
+      },
+      isLoading: _isLoading,
+    );
+  }
+
+  void _showChangePasswordDialog(BuildContext context) {
+    ChangePasswordDialog.showChangePasswordDialog(
+      context,
+      onSave: (newPassword) {
+        setState(() {
+          _isLoading = true;
+        });
+        updatePassword(newPassword);
       },
       isLoading: _isLoading,
     );

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:age_of_gold_mobile/views/login/views/forgot_password_page.dart';
 import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -20,15 +21,9 @@ import 'dialog/oauth_webview_dialog.dart';
 import 'package:age_of_gold_mobile/views/login/service/google_sign_in_service.dart';
 
 class AuthPage extends StatefulWidget {
-
   final bool showSignUp;
 
-  const AuthPage(
-      {
-        super.key,
-        this.showSignUp = false,
-      }
-    );
+  const AuthPage({super.key, this.showSignUp = false});
 
   @override
   State<AuthPage> createState() => _AuthPageState();
@@ -39,7 +34,8 @@ class _AuthPageState extends State<AuthPage> {
   bool _isLoading = false;
   bool _isLogin = true;
 
-  final TextEditingController _emailOrUsernameController = TextEditingController();
+  final TextEditingController _emailOrUsernameController =
+      TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -100,7 +96,10 @@ class _AuthPageState extends State<AuthPage> {
                                       mainAxisSize: MainAxisSize.min,
                                       children: [
                                         const SizedBox(height: 10),
-                                        PageHeading(title: _isLogin ? 'Sign in' : 'Sign up'),
+                                        PageHeading(
+                                          title:
+                                              _isLogin ? 'Sign in' : 'Sign up',
+                                        ),
                                         const SizedBox(height: 16),
                                         if (!_isLogin) ...[
                                           CustomInputField(
@@ -109,7 +108,8 @@ class _AuthPageState extends State<AuthPage> {
                                             isDense: true,
                                             controller: _usernameController,
                                             validator: (textValue) {
-                                              if (textValue == null || textValue.trim().isEmpty) {
+                                              if (textValue == null ||
+                                                  textValue.trim().isEmpty) {
                                                 return 'Username is required!';
                                               }
                                               return null;
@@ -122,10 +122,13 @@ class _AuthPageState extends State<AuthPage> {
                                             isDense: true,
                                             controller: _emailController,
                                             validator: (textValue) {
-                                              if (textValue == null || textValue.trim().isEmpty) {
+                                              if (textValue == null ||
+                                                  textValue.trim().isEmpty) {
                                                 return 'Email is required!';
                                               }
-                                              if (!EmailValidator.validate(textValue.trim())) {
+                                              if (!EmailValidator.validate(
+                                                textValue.trim(),
+                                              )) {
                                                 return 'Please enter a valid email';
                                               }
                                               return null;
@@ -136,12 +139,14 @@ class _AuthPageState extends State<AuthPage> {
                                             labelText: 'Email or Username',
                                             hintText: 'Your email or username',
                                             validator: (textValue) {
-                                              if (textValue == null || textValue.trim().isEmpty) {
+                                              if (textValue == null ||
+                                                  textValue.trim().isEmpty) {
                                                 return 'This field is required!';
                                               }
                                               return null;
                                             },
-                                            controller: _emailOrUsernameController,
+                                            controller:
+                                                _emailOrUsernameController,
                                           ),
                                         ],
                                         const SizedBox(height: 16),
@@ -152,7 +157,8 @@ class _AuthPageState extends State<AuthPage> {
                                           obscureText: true,
                                           controller: _passwordController,
                                           validator: (textValue) {
-                                            if (textValue == null || textValue.trim().isEmpty) {
+                                            if (textValue == null ||
+                                                textValue.trim().isEmpty) {
                                               return 'Password is required!';
                                             }
                                             return null;
@@ -165,10 +171,17 @@ class _AuthPageState extends State<AuthPage> {
                                             alignment: Alignment.centerRight,
                                             child: GestureDetector(
                                               onTap: () {
-                                                // Navigate to forget password page
+                                                Navigator.pushReplacement(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder:
+                                                        (context) =>
+                                                            const ForgotPasswordPage(),
+                                                  ),
+                                                );
                                               },
                                               child: const Text(
-                                                'Forget password?',
+                                                'Forgot password?',
                                                 style: TextStyle(
                                                   color: Color(0xff939393),
                                                   fontSize: 13,
@@ -180,17 +193,26 @@ class _AuthPageState extends State<AuthPage> {
                                         ],
                                         const SizedBox(height: 16),
                                         CustomFormButton(
-                                          innerText: _isLogin ? 'Sign in' : 'Sign up',
-                                          onPressed: _isLogin ? _handleLoginUser : _handleSignupUser,
+                                          innerText:
+                                              _isLogin ? 'Sign in' : 'Sign up',
+                                          onPressed:
+                                              _isLogin
+                                                  ? _handleLoginUser
+                                                  : _handleSignupUser,
                                         ),
                                         const SizedBox(height: 16),
                                         Row(
                                           children: [
                                             const Expanded(child: Divider()),
                                             Padding(
-                                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 10,
+                                                  ),
                                               child: Text(
-                                                _isLogin ? 'or sign in with' : 'or sign up with',
+                                                _isLogin
+                                                    ? 'or sign in with'
+                                                    : 'or sign up with',
                                                 style: const TextStyle(
                                                   color: Color(0xff939393),
                                                   fontSize: 13,
@@ -205,34 +227,43 @@ class _AuthPageState extends State<AuthPage> {
                                           context,
                                           buttons: [
                                             {
-                                              'logoPath': 'assets/images/oauth2/google_logo.png',
+                                              'logoPath':
+                                                  'assets/images/oauth2/google_logo.png',
                                               'label': 'Google',
                                               'provider': 'google',
                                             },
                                             {
-                                              'logoPath': 'assets/images/oauth2/apple_logo.png',
+                                              'logoPath':
+                                                  'assets/images/oauth2/apple_logo.png',
                                               'label': 'Apple',
                                               'provider': 'apple',
                                             },
                                             {
-                                              'logoPath': 'assets/images/oauth2/reddit_logo.png',
+                                              'logoPath':
+                                                  'assets/images/oauth2/reddit_logo.png',
                                               'label': 'Reddit',
                                               'provider': 'reddit',
                                             },
                                             {
-                                              'logoPath': 'assets/images/oauth2/github_logo.png',
+                                              'logoPath':
+                                                  'assets/images/oauth2/github_logo.png',
                                               'label': 'GitHub',
                                               'provider': 'github',
                                             },
                                           ],
-                                          onPressed: (provider) => _handleOAuthSignIn(provider)
+                                          onPressed:
+                                              (provider) =>
+                                                  _handleOAuthSignIn(provider),
                                         ),
                                         const SizedBox(height: 16),
                                         Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
                                           children: [
                                             Text(
-                                              _isLogin ? "Don't have an account? " : 'Already have an account? ',
+                                              _isLogin
+                                                  ? "Don't have an account? "
+                                                  : 'Already have an account? ',
                                               style: const TextStyle(
                                                 fontSize: 13,
                                                 color: Color(0xff939393),
@@ -243,11 +274,14 @@ class _AuthPageState extends State<AuthPage> {
                                               onTap: () {
                                                 setState(() {
                                                   _isLogin = !_isLogin;
-                                                  _formKey.currentState?.reset();
+                                                  _formKey.currentState
+                                                      ?.reset();
                                                 });
                                               },
                                               child: Text(
-                                                _isLogin ? 'Sign up' : 'Sign in',
+                                                _isLogin
+                                                    ? 'Sign up'
+                                                    : 'Sign in',
                                                 style: const TextStyle(
                                                   fontSize: 15,
                                                   color: Color(0xff748288),
@@ -266,7 +300,8 @@ class _AuthPageState extends State<AuthPage> {
                             ),
                           ],
                         ),
-                        if (_isLoading) const Center(child: CircularProgressIndicator()),
+                        if (_isLoading)
+                          const Center(child: CircularProgressIndicator()),
                       ],
                     ),
                   ),
@@ -299,7 +334,9 @@ class _AuthPageState extends State<AuthPage> {
       );
       await AuthStore().successfulLogin(loginResponse, 0);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sign up successful!')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Sign up successful!')));
       await Future.delayed(const Duration(seconds: 1));
       if (!mounted) return;
       Navigator.pushReplacement(
@@ -339,7 +376,9 @@ class _AuthPageState extends State<AuthPage> {
       );
       await AuthStore().successfulLogin(loginResponse, 0);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sign in successful!')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Sign in successful!')));
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const AgeOfGoldHome()),
@@ -365,10 +404,14 @@ class _AuthPageState extends State<AuthPage> {
     setState(() => _isLoading = true);
     try {
       if (provider == "reddit") {
-        await _showOAuthWebviewDialog(Uri.parse("https://ageof.gold/api/v1.0/auth/reddit"));
+        await _showOAuthWebviewDialog(
+          Uri.parse("https://ageof.gold/api/v1.0/auth/reddit"),
+        );
         return;
       } else if (provider == "github") {
-        await _showOAuthWebviewDialog(Uri.parse("https://ageof.gold/api/v1.0/auth/github"));
+        await _showOAuthWebviewDialog(
+          Uri.parse("https://ageof.gold/api/v1.0/auth/github"),
+        );
         return;
       } else if (provider == "google") {
         await _handleGoogleSignIn();
@@ -377,12 +420,14 @@ class _AuthPageState extends State<AuthPage> {
         if (Platform.isIOS) {
           await _handleAppleSignIn();
         } else {
-          await _showOAuthWebviewDialog(Uri.parse("https://ageof.gold/api/v1.0/auth/apple"));
+          await _showOAuthWebviewDialog(
+            Uri.parse("https://ageof.gold/api/v1.0/auth/apple"),
+          );
         }
         return;
       }
     } catch (exception) {
-      print(exception.toString());
+      // logger.error(exception.toString());
     } finally {
       setState(() => _isLoading = false);
     }
@@ -397,7 +442,9 @@ class _AuthPageState extends State<AuthPage> {
     );
     if (oauthWebviewResult == true) {
       if (!mounted) return false;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sign in successful!')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Sign in successful!')));
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const AgeOfGoldHome()),
@@ -410,43 +457,52 @@ class _AuthPageState extends State<AuthPage> {
     try {
       final googleSignInService = GoogleSignInService();
       final accessToken = await googleSignInService.signInWithGoogle();
-      LoginResponse loginResponse = await AuthLogin().loginGoogleToken(accessToken);
+      LoginResponse loginResponse = await AuthLogin().loginGoogleToken(
+        accessToken,
+      );
       await AuthStore().successfulLogin(loginResponse, 1);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sign in successful!')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Sign in successful!')));
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const AgeOfGoldHome()),
       );
     } catch (exception) {
-      print(exception.toString());
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Google login failed.')));
+      // logger.error(exception.toString());
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Google login failed.')));
     }
   }
 
   Future<void> _handleAppleSignIn() async {
     try {
       final credential = await SignInWithApple.getAppleIDCredential(
-        scopes: [
-          AppleIDAuthorizationScopes.email,
-        ],
+        scopes: [AppleIDAuthorizationScopes.email],
       );
 
-      print(credential.identityToken);
       if (credential.identityToken == null) {
         throw Exception('No identity token');
       }
-      LoginResponse loginResponse = await AuthLogin().loginAppleToken(credential.identityToken!);
+      LoginResponse loginResponse = await AuthLogin().loginAppleToken(
+        credential.identityToken!,
+      );
       await AuthStore().successfulLogin(loginResponse, 4);
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sign in successful!')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Sign in successful!')));
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => const AgeOfGoldHome()),
       );
     } catch (exception) {
-      print(exception.toString());
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Google login failed.')));
+      // logger.error(exception.toString());
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Google login failed.')));
     }
   }
 }

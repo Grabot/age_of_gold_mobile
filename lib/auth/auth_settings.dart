@@ -71,6 +71,25 @@ class AuthSettings {
     }
   }
 
+  Future<BasicResponse> updatePassword(String newPassword) async {
+    try {
+      final response = await AuthApi().dio.patch(
+        "${dotenv.env['API_VERSION']}/password/reset",
+        options: Options(
+          headers: {HttpHeaders.contentTypeHeader: "application/json"},
+        ),
+        data: jsonEncode(<String, String>{"new_password": newPassword}),
+      );
+      final basicResponse = BasicResponse.fromJson(response.data);
+      if (basicResponse.success == null || basicResponse.success == false) {
+        throw Exception("Couldn't change password");
+      }
+      return basicResponse;
+    } on DioException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
   Future<BasicResponse> updateAvatar(
     String filePath,
     bool defaultAvatar,

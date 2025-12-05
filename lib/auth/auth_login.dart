@@ -116,9 +116,7 @@ class AuthLogin {
         options: Options(
           headers: {HttpHeaders.contentTypeHeader: "application/json"},
         ),
-        data: jsonEncode(<String, String>{
-          "access_token": accessToken,
-        }),
+        data: jsonEncode(<String, String>{"access_token": accessToken}),
       );
       final loginResponse = LoginResponse.fromJson(response.data);
       if (loginResponse.accessToken == null ||
@@ -141,9 +139,7 @@ class AuthLogin {
         options: Options(
           headers: {HttpHeaders.contentTypeHeader: "application/json"},
         ),
-        data: jsonEncode(<String, String>{
-          "access_token": accessToken,
-        }),
+        data: jsonEncode(<String, String>{"access_token": accessToken}),
       );
       final loginResponse = LoginResponse.fromJson(response.data);
       if (loginResponse.accessToken == null ||
@@ -170,6 +166,25 @@ class AuthLogin {
       final basicResponse = BasicResponse.fromJson(response.data);
       if (basicResponse.success == null || basicResponse.success == false) {
         throw Exception("Couldn't logout");
+      }
+      return basicResponse;
+    } on DioException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
+  Future<BasicResponse> forgotPassword(String email) async {
+    try {
+      final response = await CleanApi().dio.post(
+        "${dotenv.env['API_VERSION']}/password/forgot",
+        options: Options(
+          headers: {HttpHeaders.contentTypeHeader: "application/json"},
+        ),
+        data: jsonEncode(<String, String>{"email": email}),
+      );
+      BasicResponse basicResponse = BasicResponse.fromJson(response.data);
+      if (basicResponse.success == null || basicResponse.success == false) {
+        throw UnauthorizedException(response.requestOptions, "Invalid request");
       }
       return basicResponse;
     } on DioException catch (e) {

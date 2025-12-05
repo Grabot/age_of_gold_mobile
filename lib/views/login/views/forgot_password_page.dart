@@ -1,19 +1,20 @@
+import 'package:age_of_gold_mobile/auth/auth_login.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
-import 'components/custom_form_button.dart';
-import 'components/custom_input_field.dart';
-import 'components/page_header.dart';
-import 'components/page_heading.dart';
-import 'login/auth_page.dart';
+import '../../components/custom_form_button.dart';
+import '../../components/custom_input_field.dart';
+import '../../components/page_header.dart';
+import '../../components/page_heading.dart';
+import '../auth_page.dart';
 
-class ForgetPasswordPage extends StatefulWidget {
-  const ForgetPasswordPage({super.key});
+class ForgotPasswordPage extends StatefulWidget {
+  const ForgotPasswordPage({super.key});
 
   @override
-  State<ForgetPasswordPage> createState() => _ForgetPasswordPageState();
+  State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
 }
 
-class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
+class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final _forgetPasswordFormKey = GlobalKey<FormState>();
   TextEditingController emailController = TextEditingController();
 
@@ -39,7 +40,7 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
                       const PageHeading(title: 'Forgot password'),
                       CustomInputField(
                         labelText: 'Email',
-                        hintText: 'Your email id',
+                        hintText: 'Your email',
                         validator: (textValue) {
                           if (textValue == null || textValue.isEmpty) {
                             return 'Email is required!';
@@ -68,8 +69,7 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
                                     Navigator.pushReplacement(
                                       context,
                                       MaterialPageRoute(
-                                        builder:
-                                            (context) => const AuthPage(),
+                                        builder: (context) => const AuthPage(),
                                       ),
                                     ),
                                   },
@@ -97,11 +97,31 @@ class _ForgetPasswordPageState extends State<ForgetPasswordPage> {
     );
   }
 
-  void _handleForgetPassword() {
+  Future<void> _handleForgetPassword() async {
     if (_forgetPasswordFormKey.currentState!.validate()) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Submitting data..')));
+      try {
+        final email = emailController.text;
+        await AuthLogin().forgotPassword(email);
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Password reset send! Please check your email'),
+          ),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const AuthPage()),
+        );
+      } catch (e) {
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Something went wrong, forgot password email not sent. Please try again',
+            ),
+          ),
+        );
+      }
     }
   }
 }

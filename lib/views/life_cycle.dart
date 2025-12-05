@@ -4,10 +4,7 @@ import '../utils/auth_store.dart';
 import '../utils/socket_services.dart';
 
 class LifeCycle extends StatefulWidget {
-  const LifeCycle({
-    super.key,
-    required this.child
-  });
+  const LifeCycle({super.key, required this.child});
 
   final Widget child;
 
