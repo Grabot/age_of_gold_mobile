@@ -1,13 +1,16 @@
 import 'dart:typed_data';
 import 'package:age_of_gold_mobile/utils/secure_storage.dart';
+import 'package:age_of_gold_mobile/utils/storage.dart';
 import 'package:age_of_gold_mobile/views/age_of_gold_home/dialogs/change_username_dialog.dart';
 import 'package:age_of_gold_mobile/views/age_of_gold_home/dialogs/logout_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:age_of_gold_mobile/utils/auth_store.dart';
 import '../../auth/auth_settings.dart';
 import '../../utils/utils.dart';
+import '../login/auth_page.dart';
 import 'dialogs/change_avatar_dialog.dart';
 import 'dialogs/change_password_dialog.dart';
+import 'dialogs/delete_account_dialog.dart';
 
 class AgeOfGoldHome extends StatefulWidget {
   const AgeOfGoldHome({super.key});
@@ -97,13 +100,13 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
                 ? null
                 : (value) {
                   if (value == 'logout') {
-                    _showLogoutDialog(context);
+                    _showLogoutDialog();
                   } else if (value == 'change_username') {
-                    _showChangeUsernameDialog(context);
+                    _showChangeUsernameDialog();
                   } else if (value == "change_password") {
-                    _showChangePasswordDialog(context);
+                    _showChangePasswordDialog();
                   } else if (value == 'change_avatar') {
-                    _showChangeAvatarDialog(context).then((avatarChanged) {
+                    _showChangeAvatarDialog().then((avatarChanged) {
                       if (mounted && avatarChanged) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(
@@ -113,6 +116,8 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
                         setState(() {});
                       }
                     });
+                  } else if (value == 'delete_account') {
+                    _showDeleteAccountDialog();
                   }
                 },
         itemBuilder:
@@ -129,9 +134,14 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
                 value: 'change_password',
                 child: Text('Change Password'),
               ),
+              const PopupMenuDivider(),
               const PopupMenuItem<String>(
                 value: 'logout',
                 child: Text('Logout'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'delete_account',
+                child: Text('Delete Account', style: TextStyle(color: Colors.red)), // Make the text red to signify its significance
               ),
             ],
       ),
@@ -165,7 +175,7 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
                         _isLoading
                             ? null
                             : () {
-                              _showLogoutDialog(context);
+                              _showLogoutDialog();
                             },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.redAccent[700],
@@ -221,7 +231,7 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
     );
   }
 
-  Future<void> _showLogoutDialog(BuildContext context) async {
+  Future<void> _showLogoutDialog() async {
     await showDialog<void>(
       context: context,
       builder: (BuildContext context) => const LogoutDialog(),
@@ -268,7 +278,7 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
     }
   }
 
-  void _showChangeUsernameDialog(BuildContext context) {
+  void _showChangeUsernameDialog() {
     ChangeUsernameDialog.showChangeUsernameDialog(
       context,
       currentUsername: authStore.me.user.username,
@@ -282,7 +292,29 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
     );
   }
 
-  void _showChangePasswordDialog(BuildContext context) {
+  void _showDeleteAccountDialog() {
+    DeleteAccountDialog.showDeleteAccountDialog(
+      context,
+      onDelete: () {
+        try {
+          AuthSettings().deleteAccount().then((value) async {
+            await Storage().clearMe();
+            await SecureStorage().clearTokens();
+            await SecureStorage().clearMe();
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const AuthPage()),
+            );
+          });
+        } catch (e) {
+          showToastMessage('Failed to delete account: ${e.toString()}');
+        }
+      },
+      isLoading: false,
+    );
+  }
+
+  void _showChangePasswordDialog() {
     ChangePasswordDialog.showChangePasswordDialog(
       context,
       onSave: (newPassword) {
@@ -295,7 +327,7 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
     );
   }
 
-  Future<bool> _showChangeAvatarDialog(BuildContext context) async {
+  Future<bool> _showChangeAvatarDialog() async {
     final avatarChanged = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {

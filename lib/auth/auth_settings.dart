@@ -120,4 +120,22 @@ class AuthSettings {
       throw Exception(e.message);
     }
   }
+
+  Future<BasicResponse> deleteAccount() async {
+    try {
+      final response = await AuthApi().dio.delete(
+        "${dotenv.env['API_VERSION']}/delete/account",
+        options: Options(
+          headers: {HttpHeaders.contentTypeHeader: "application/json"},
+        ),
+      );
+      final basicResponse = BasicResponse.fromJson(response.data);
+      if (basicResponse.success == null || basicResponse.success == false) {
+        throw Exception("Couldn't change password");
+      }
+      return basicResponse;
+    } on DioException catch (e) {
+      throw Exception(e.message);
+    }
+  }
 }
