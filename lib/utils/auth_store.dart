@@ -100,7 +100,7 @@ class AuthStore {
     }
   }
 
-  successfulLogin(LoginResponse loginResponse, int? origin) async {
+  handleLoginResponse(LoginResponse loginResponse, int? origin) async {
     if (loginResponse.accessToken == null ||
         loginResponse.refreshToken == null) {
       throw Exception("Invalid login response: missing tokens");
@@ -194,7 +194,7 @@ class AuthStore {
     }
     try {
       LoginResponse loginResponse = await AuthLogin().loginToken();
-      successfulLogin(loginResponse, null);
+      handleLoginResponse(loginResponse, null);
     } catch (e) {
       throw Exception("Token login failed.");
     }

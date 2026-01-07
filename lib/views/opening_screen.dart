@@ -235,7 +235,7 @@ class _OpeningScreenState extends State<OpeningScreen> {
           context,
         ).showSnackBar(const SnackBar(content: Text('Sign in successful!')));
 
-        await AuthStore().successfulLogin(loginResponse, null);
+        await AuthStore().handleLoginResponse(loginResponse, null);
 
         if (!mounted) return;
         Navigator.pushReplacement(

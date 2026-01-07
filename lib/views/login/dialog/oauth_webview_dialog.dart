@@ -57,7 +57,7 @@ class OAuthWebviewDialogState extends State<OAuthWebviewDialog> {
                       final loginResponse = await AuthLogin().loginToken();
                       // TODO: Pass origin to oauth webview?
                       int origin = 0;
-                      await AuthStore().successfulLogin(loginResponse, origin);
+                      await AuthStore().handleLoginResponse(loginResponse, origin);
                       if (!mounted) return NavigationDecision.prevent;
                       Navigator.of(context).pop(true);
                     } catch (e) {

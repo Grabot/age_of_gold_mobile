@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:age_of_gold_mobile/views/age_of_gold_home/age_of_gold_home.dart';
+import 'package:age_of_gold_mobile/views/friends/friends_page.dart';
 import 'package:flutter/material.dart';
 import 'package:age_of_gold_mobile/utils/auth_store.dart';
 import 'package:age_of_gold_mobile/utils/secure_storage.dart';
@@ -173,35 +174,56 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  void backButtonFunctionality() {
+    Navigator.pushReplacement(context,
+        MaterialPageRoute(builder: (context) => AgeOfGoldHome(key: UniqueKey())));
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: SharedAppBar(title: 'Profile', homePage: const AgeOfGoldHome()),
-      backgroundColor: const Color(0xffEEF1F3),
-      body: Stack(
-        children: [
-          Container(
-            color: const Color(0xffEEF1F3),
-            child: Center(
-              child: Container(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-                ),
-                width: MediaQuery.of(context).size.width * 0.9,
-                height: MediaQuery.of(context).size.height * 0.8,
-                child: _buildMainContent(),
-              ),
-            ),
-          ),
-          if (_isLoading)
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (bool didPop, result) {
+        if (!didPop) {
+          backButtonFunctionality();
+        }
+      },
+      child: Scaffold(
+        appBar: SharedAppBar(
+          title: 'Profile',
+          homePage: const AgeOfGoldHome(),
+          friendsPage: const FriendsPage(),
+          showHomeOption: true,
+          showProfileOption: false,
+          showFriendsOption: true,
+          backButtonFunctionality: backButtonFunctionality,
+        ),
+        backgroundColor: const Color(0xffEEF1F3),
+        body: Stack(
+          children: [
             Container(
-              color: Colors.black.withValues(alpha: 0.5),
-              child: const Center(
-                child: CircularProgressIndicator(color: Colors.white),
+              color: const Color(0xffEEF1F3),
+              child: Center(
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                  ),
+                  width: MediaQuery.of(context).size.width * 0.9,
+                  height: MediaQuery.of(context).size.height * 0.8,
+                  child: _buildMainContent(),
+                ),
               ),
             ),
-        ],
+            if (_isLoading)
+              Container(
+                color: Colors.black.withValues(alpha: 0.5),
+                child: const Center(
+                  child: CircularProgressIndicator(color: Colors.white),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

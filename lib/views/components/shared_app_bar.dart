@@ -1,19 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:age_of_gold_mobile/utils/auth_store.dart';
+import '../age_of_gold_home/age_of_gold_home.dart';
 import '../age_of_gold_home/dialogs/logout_dialog.dart';
+import '../friends/friends_page.dart';
 
 class SharedAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
   final Widget? profilePage;
   final Widget? homePage;
+  final Widget? friendsPage;
   final bool showHomeOption;
+  final bool showProfileOption;
+  final bool showFriendsOption;
+  final bool showBackButton;
+  final void Function() backButtonFunctionality;
 
   const SharedAppBar({
     super.key,
     required this.title,
     this.profilePage,
     this.homePage,
+    this.friendsPage,
     this.showHomeOption = true,
+    this.showProfileOption = true,
+    this.showFriendsOption = true,
+    this.showBackButton = true,
+    required this.backButtonFunctionality,
   });
 
   @override
@@ -59,6 +71,11 @@ class _SharedAppBarState extends State<SharedAppBar> {
   Widget build(BuildContext context) {
     return AppBar(
       title: Text(widget.title),
+      leading: widget.showBackButton ? IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            widget.backButtonFunctionality();
+          }) : Container(),
       actions: [
         Padding(
           padding: const EdgeInsets.all(8.0),
@@ -68,7 +85,7 @@ class _SharedAppBarState extends State<SharedAppBar> {
           icon: const Icon(Icons.more_vert, color: Colors.white),
           onSelected: (value) {
             if (value == 'profile' && widget.profilePage != null) {
-              Navigator.pushReplacement(
+              Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => widget.profilePage!),
               );
@@ -76,6 +93,16 @@ class _SharedAppBarState extends State<SharedAppBar> {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => widget.homePage!),
+              );
+            } else if (value == 'profile' && widget.profilePage != null) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => widget.profilePage!),
+              );
+            } else if (value == 'friends') {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => widget.friendsPage!),
               );
             } else if (value == 'logout') {
               showDialog(
@@ -94,12 +121,20 @@ class _SharedAppBarState extends State<SharedAppBar> {
                       title: Text('Home'),
                     ),
                   ),
-                if (widget.profilePage != null)
+                if (widget.showProfileOption && widget.profilePage != null)
                   const PopupMenuItem<String>(
                     value: 'profile',
                     child: ListTile(
                       leading: Icon(Icons.person),
                       title: Text('Profile'),
+                    ),
+                  ),
+                if (widget.showFriendsOption)
+                  const PopupMenuItem<String>(
+                    value: 'friends',
+                    child: ListTile(
+                      leading: Icon(Icons.people),
+                      title: Text('Friends'),
                     ),
                   ),
                 const PopupMenuItem<String>(

@@ -332,7 +332,7 @@ class _AuthPageState extends State<AuthPage> {
       LoginResponse loginResponse = await AuthLogin().signUp(
         SignUpRequest(email: email, username: username, password: password),
       );
-      await AuthStore().successfulLogin(loginResponse, 0);
+      await AuthStore().handleLoginResponse(loginResponse, 0);
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
@@ -374,7 +374,7 @@ class _AuthPageState extends State<AuthPage> {
       LoginResponse? loginResponse = await AuthLogin().signIn(
         SignInRequest(emailOrUsername: emailOrUsername, password: password),
       );
-      await AuthStore().successfulLogin(loginResponse, 0);
+      await AuthStore().handleLoginResponse(loginResponse, 0);
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
@@ -460,7 +460,7 @@ class _AuthPageState extends State<AuthPage> {
       LoginResponse loginResponse = await AuthLogin().loginGoogleToken(
         accessToken,
       );
-      await AuthStore().successfulLogin(loginResponse, 1);
+      await AuthStore().handleLoginResponse(loginResponse, 1);
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,
@@ -489,7 +489,7 @@ class _AuthPageState extends State<AuthPage> {
       LoginResponse loginResponse = await AuthLogin().loginAppleToken(
         credential.identityToken!,
       );
-      await AuthStore().successfulLogin(loginResponse, 4);
+      await AuthStore().handleLoginResponse(loginResponse, 4);
       if (!mounted) return;
       ScaffoldMessenger.of(
         context,

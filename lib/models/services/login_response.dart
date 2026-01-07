@@ -1,8 +1,11 @@
+import '../friend.dart';
+
 class LoginResponse {
   String? accessToken;
   String? refreshToken;
   int? profileVersion;
   int? avatarVersion;
+  List<Friend>? friends;
 
   LoginResponse.fromJson(Map<String, dynamic> json) {
     if (json.containsKey("success") && json["success"]) {
@@ -19,6 +22,9 @@ class LoginResponse {
         }
         if (data.containsKey("avatar_version")) {
           avatarVersion = data["avatar_version"];
+        }
+        if (data.containsKey("friends")) {
+          friends = List<Friend>.from(data["friends"].map((x) => Friend.fromJson(x)));
         }
       }
     }
