@@ -6,6 +6,7 @@ import 'package:age_of_gold_mobile/utils/secure_storage.dart';
 import 'package:age_of_gold_mobile/utils/socket_services.dart';
 import 'package:age_of_gold_mobile/utils/storage.dart';
 import 'package:age_of_gold_mobile/utils/utils.dart';
+import 'package:flutter/material.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 import '../auth/app_interceptors.dart';
 import '../auth/auth_settings.dart';
@@ -13,6 +14,7 @@ import '../models/auth/me.dart';
 import '../models/auth/user.dart';
 import '../models/services/login_response.dart';
 import 'package:age_of_gold_mobile/constants/route_paths.dart' as routes;
+import '../views/login/auth_page.dart';
 import 'navigation_service.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -77,6 +79,27 @@ class AuthStore {
     navigationService.navigateTo(routes.signInRoute);
   }
 
+
+  Future<void> loadUserData() async {
+    final shouldUpdate = await SecureStorage().getShouldUpdateAvatar();
+    if (shouldUpdate) {
+      await updateAvatar();
+    }
+    return;
+  }
+
+
+  Future<void> updateAvatar() async {
+    try {
+      final avatarBytes = await AuthSettings().getAvatar(false);
+      await saveNewAvatar(avatarBytes);
+    } catch (e) {
+      showToastMessage('Failed to update avatar. Please try again later.');
+    } finally {
+      await SecureStorage().setShouldUpdateAvatar(false);
+    }
+  }
+
   successfulLogin(LoginResponse loginResponse, int? origin) async {
     if (loginResponse.accessToken == null ||
         loginResponse.refreshToken == null) {
@@ -124,7 +147,7 @@ class AuthStore {
       if (_me!.user.avatarPath == null) {
         await secureStorage.setShouldUpdateAvatar(true);
       } else {
-        if (await _me!.user.getAvatarBytes() == false) {
+        if (await _me!.user.loadAvatarBytes() == false) {
           await secureStorage.setShouldUpdateAvatar(true);
         }
       }
@@ -174,6 +197,20 @@ class AuthStore {
       successfulLogin(loginResponse, null);
     } catch (e) {
       throw Exception("Token login failed.");
+    }
+  }
+
+  Future<void> logout(BuildContext context) async {
+    try {
+      await Storage().clearMe();
+      await SecureStorage().clearTokens();
+      await SecureStorage().clearMe();
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const AuthPage()),
+      );
+    } catch (e) {
+      showToastMessage('Failed to logout: ${e.toString()}');
     }
   }
 }

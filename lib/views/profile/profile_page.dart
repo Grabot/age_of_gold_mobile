@@ -1,0 +1,344 @@
+import 'dart:typed_data';
+import 'package:age_of_gold_mobile/views/age_of_gold_home/age_of_gold_home.dart';
+import 'package:flutter/material.dart';
+import 'package:age_of_gold_mobile/utils/auth_store.dart';
+import 'package:age_of_gold_mobile/utils/secure_storage.dart';
+import 'package:age_of_gold_mobile/views/age_of_gold_home/dialogs/change_username_dialog.dart';
+import 'package:age_of_gold_mobile/views/age_of_gold_home/dialogs/logout_dialog.dart';
+import 'package:age_of_gold_mobile/views/age_of_gold_home/dialogs/change_avatar_dialog.dart';
+import 'package:age_of_gold_mobile/views/age_of_gold_home/dialogs/change_password_dialog.dart';
+import 'package:age_of_gold_mobile/views/age_of_gold_home/dialogs/delete_account_dialog.dart';
+import 'package:age_of_gold_mobile/auth/auth_settings.dart';
+import 'package:age_of_gold_mobile/utils/utils.dart';
+import 'package:age_of_gold_mobile/utils/storage.dart';
+import '../login/auth_page.dart';
+import '../components/shared_app_bar.dart';
+
+class ProfilePage extends StatefulWidget {
+  const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  bool _isLoading = false;
+  late AuthStore authStore;
+
+  @override
+  void initState() {
+    super.initState();
+    authStore = AuthStore();
+    authStore.loadUserData().then((_) {
+      setState(() {});
+    });
+  }
+
+  Widget _buildAvatar() {
+    return SizedBox(
+      width: 120,
+      height: 120,
+      child:
+          authStore.me.user.avatar != null
+              ? Image.memory(
+                authStore.me.user.avatar!,
+                width: 120,
+                height: 120,
+                fit: BoxFit.cover,
+              )
+              : Center(
+                child: Text(
+                  authStore.me.user.username.substring(0, 1).toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 60,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+    );
+  }
+
+  Widget _buildSettingsButton() {
+    return Positioned(
+      top: 10,
+      right: 20,
+      child: PopupMenuButton<String>(
+        enabled: !_isLoading,
+        icon: const Icon(Icons.settings, color: Colors.grey),
+        onSelected:
+            _isLoading
+                ? null
+                : (value) {
+                  if (value == 'logout') {
+                    _showLogoutDialog();
+                  } else if (value == 'change_username') {
+                    _showChangeUsernameDialog();
+                  } else if (value == "change_password") {
+                    _showChangePasswordDialog();
+                  } else if (value == 'change_avatar') {
+                    _showChangeAvatarDialog().then((avatarChanged) {
+                      if (mounted && avatarChanged) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Avatar updated successfully!'),
+                          ),
+                        );
+                        setState(() {});
+                      }
+                    });
+                  } else if (value == 'delete_account') {
+                    _showDeleteAccountDialog();
+                  }
+                },
+        itemBuilder:
+            (BuildContext context) => [
+              const PopupMenuItem<String>(
+                value: 'change_username',
+                child: Text('Change Username'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'change_avatar',
+                child: Text('Change Avatar'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'change_password',
+                child: Text('Change Password'),
+              ),
+              const PopupMenuDivider(),
+              const PopupMenuItem<String>(
+                value: 'logout',
+                child: Text('Logout'),
+              ),
+              const PopupMenuItem<String>(
+                value: 'delete_account',
+                child: Text(
+                  'Delete Account',
+                  style: TextStyle(color: Colors.red),
+                ), // Make the text red to signify its significance
+              ),
+            ],
+      ),
+    );
+  }
+
+  Widget _buildMainContent() {
+    return Stack(
+      children: [
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _buildAvatar(),
+                const SizedBox(height: 20),
+                Text(
+                  authStore.me.user.username,
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xff2C3E50),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                SizedBox(
+                  width: 200,
+                  child: ElevatedButton(
+                    onPressed:
+                        _isLoading
+                            ? null
+                            : () {
+                              _showLogoutDialog();
+                            },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.redAccent[700],
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    child: const Text(
+                      'Logout',
+                      style: TextStyle(fontSize: 16, color: Colors.white),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        _buildSettingsButton(),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: SharedAppBar(title: 'Profile', homePage: const AgeOfGoldHome()),
+      backgroundColor: const Color(0xffEEF1F3),
+      body: Stack(
+        children: [
+          Container(
+            color: const Color(0xffEEF1F3),
+            child: Center(
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                width: MediaQuery.of(context).size.width * 0.9,
+                height: MediaQuery.of(context).size.height * 0.8,
+                child: _buildMainContent(),
+              ),
+            ),
+          ),
+          if (_isLoading)
+            Container(
+              color: Colors.black.withValues(alpha: 0.5),
+              child: const Center(
+                child: CircularProgressIndicator(color: Colors.white),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showLogoutDialog() async {
+    await showDialog<void>(
+      context: context,
+      builder: (BuildContext context) => const LogoutDialog(),
+    );
+  }
+
+  void updatePassword(String newPassword) async {
+    try {
+      await AuthSettings().updatePassword(newPassword);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password updated successfully!')),
+      );
+    } catch (e) {
+      showToastMessage('Failed to update password');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void updateUsername(String newUsername) async {
+    try {
+      await AuthSettings().updateUsername(newUsername);
+      authStore.me.user.username = newUsername;
+      authStore.me.save();
+      int profileVersion = await SecureStorage().getProfileVersion();
+      SecureStorage().setProfileVersion(profileVersion + 1);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Username updated successfully!')),
+      );
+    } catch (e) {
+      showToastMessage('Failed to update username: ${e.toString()}');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _showChangeUsernameDialog() {
+    ChangeUsernameDialog.showChangeUsernameDialog(
+      context,
+      currentUsername: authStore.me.user.username,
+      onSave: (newUsername) {
+        setState(() {
+          _isLoading = true;
+        });
+        updateUsername(newUsername);
+      },
+      isLoading: _isLoading,
+    );
+  }
+
+  void _showDeleteAccountDialog() {
+    DeleteAccountDialog.showDeleteAccountDialog(
+      context,
+      onDelete: () {
+        try {
+          AuthSettings().deleteAccount().then((value) async {
+            await Storage().clearMe();
+            await SecureStorage().clearTokens();
+            await SecureStorage().clearMe();
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const AuthPage()),
+            );
+          });
+        } catch (e) {
+          showToastMessage('Failed to delete account: ${e.toString()}');
+        }
+      },
+      isLoading: false,
+    );
+  }
+
+  void _showChangePasswordDialog() {
+    ChangePasswordDialog.showChangePasswordDialog(
+      context,
+      onSave: (newPassword) {
+        setState(() {
+          _isLoading = true;
+        });
+        updatePassword(newPassword);
+      },
+      isLoading: _isLoading,
+    );
+  }
+
+  Future<bool> _showChangeAvatarDialog() async {
+    final avatarChanged = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return ChangeAvatarDialog(
+          onSave: (Uint8List image, bool defaultAvatar) async {
+            setState(() {
+              _isLoading = true;
+            });
+            try {
+              await authStore.saveNewAvatar(image);
+              await authStore.me.save();
+              if (authStore.me.user.avatarPath == null) {
+                throw Exception("Avatar path is not found");
+              }
+              await AuthSettings().updateAvatar(
+                authStore.me.user.avatarPath!,
+                defaultAvatar,
+              );
+              int avatarVersion = await SecureStorage().getAvatarVersion();
+              await SecureStorage().setAvatarVersion(avatarVersion + 1);
+            } catch (e) {
+              showToastMessage("Error saving avatar: $e");
+              return false;
+            } finally {
+              if (mounted) {
+                setState(() {
+                  _isLoading = false;
+                });
+              }
+            }
+            return true;
+          },
+        );
+      },
+    );
+
+    return avatarChanged ?? false;
+  }
+}

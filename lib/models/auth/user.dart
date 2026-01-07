@@ -25,7 +25,7 @@ class User {
     );
   }
 
-  Future<bool> getAvatarBytes() async {
+  Future<bool> loadAvatarBytes() async {
     if (avatarPath != null) {
       final avatarFile = File(avatarPath!);
       if (await avatarFile.exists()) {

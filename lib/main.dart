@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:oktoast/oktoast.dart';
 import 'package:age_of_gold_mobile/router.dart' as router;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:age_of_gold_mobile/theme/app_theme.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,6 +30,9 @@ class AgeOfGold extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.done) {
           return MaterialApp(
             title: 'Age of Gold',
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: ThemeMode.light,
             navigatorKey: locator.get<NavigationService>().navigatorKey,
             onGenerateRoute: router.generateRoute,
             initialRoute: '/',

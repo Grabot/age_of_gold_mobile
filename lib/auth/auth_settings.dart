@@ -15,8 +15,8 @@ class AuthSettings {
 
   Future<UserResponse> getUserDetails() async {
     try {
-      final response = await AuthApi().dio.get(
-        "${dotenv.env['API_VERSION']}/user/detail",
+      final response = await AuthApi().dio.post(
+        "${dotenv.env['API_VERSION']}/user",
         options: Options(
           headers: {HttpHeaders.contentTypeHeader: "application/json"},
         ),
@@ -33,15 +33,15 @@ class AuthSettings {
 
   Future<Uint8List> getAvatar(bool isDefault) async {
     try {
-      final uri = Uri.parse("${dotenv.env['API_VERSION']}/user/avatar").replace(
-        queryParameters: isDefault == true ? {'get_default': 'true'} : null,
-      );
-      final response = await AuthApi().dio.get(
-        uri.toString(),
+      final response = await AuthApi().dio.post(
+        "${dotenv.env['API_VERSION']}/user/avatar",
         options: Options(
           responseType: ResponseType.bytes,
           headers: {HttpHeaders.contentTypeHeader: "application/json"},
         ),
+        data: jsonEncode(<String, dynamic>{
+          "get_default": isDefault
+        }),
       );
       if (response.data == null) {
         throw Exception("Couldn't get avatar");
