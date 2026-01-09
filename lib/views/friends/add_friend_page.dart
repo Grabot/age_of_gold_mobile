@@ -206,7 +206,7 @@ class _AddFriendPageState extends State<AddFriendPage> {
                         Text(searchResultUsername!),
                         const Spacer(),
                         ElevatedButton(
-                          onPressed: _addFriend,
+                          onPressed: searchResultId == null || searchResultAvatar == null || searchResultUsername == null ? null : _addFriend,
                           child: const Text('Add Friend'),
                         ),
                       ],

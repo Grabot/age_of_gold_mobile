@@ -2,7 +2,7 @@ import 'package:age_of_gold_mobile/models/auth/user.dart';
 
 class Friend {
   final int friendId;
-  final bool? accepted;
+  bool? accepted;
   final int friendVersion;
   User? user;
 
@@ -46,17 +46,17 @@ class Friend {
 
   factory Friend.fromMap(Map<String, dynamic> map) {
     return Friend(
-      friendId: map['friendId'] as int,
+      friendId: map['friend_id'] as int,
       accepted: map['accepted'] != null ? (map['accepted'] == 1) : null,
-      friendVersion: map['friendVersion'] as int,
+      friendVersion: map['friend_version'] as int,
       user:
           map['user_id_fk'] != null
               ? User(
                 id: map['user_id_fk'] as int,
                 username: map['username'] ?? '',
-                profileVersion: map['profileVersion'] ?? 0,
-                avatarVersion: map['avatarVersion'] ?? 0,
-                avatarPath: map['avatarPath'] ?? '',
+                avatarVersion: map['avatar_version'] as int? ?? 1,
+                profileVersion: map['profile_version'] as int? ?? 1,
+                avatarPath: map['avatar_path'] as String?,
               )
               : null,
     );

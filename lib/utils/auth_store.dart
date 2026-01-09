@@ -1,5 +1,3 @@
-import 'dart:io';
-import 'dart:typed_data';
 import 'package:age_of_gold_mobile/auth/login_api.dart';
 import 'package:age_of_gold_mobile/models/services/user_response.dart';
 import 'package:age_of_gold_mobile/utils/secure_storage.dart';
@@ -9,7 +7,6 @@ import 'package:age_of_gold_mobile/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:jwt_decode/jwt_decode.dart';
 import '../auth/app_interceptors.dart';
-import '../auth/settings_api.dart';
 import '../auth/user_api.dart';
 import '../models/auth/me.dart';
 import '../models/auth/user.dart';
@@ -19,7 +16,6 @@ import '../auth/friends_api.dart';
 import 'package:age_of_gold_mobile/constants/route_paths.dart' as routes;
 import '../views/login/auth_page.dart';
 import 'navigation_service.dart';
-import 'package:path_provider/path_provider.dart';
 
 class AuthStore {
   static final AuthStore _instance = AuthStore._internal();
@@ -64,17 +60,33 @@ class AuthStore {
   Future<bool> getUserDetails(LoginResponse loginResponse, int? origin) async {
     try {
       UserResponse userResponse = await UserApi.getUser(null);
-      if (userResponse.success = false || userResponse.id == null || userResponse.username == null || userResponse.profileVersion == null || userResponse.avatarVersion == null) {
+      if (userResponse.success =
+          false ||
+          userResponse.id == null ||
+          userResponse.username == null ||
+          userResponse.profileVersion == null ||
+          userResponse.avatarVersion == null) {
         throw Exception("User details are incomplete.");
       }
-      User user = User(id: userResponse.id!, username: userResponse.username!, profileVersion: userResponse.profileVersion!, avatarVersion: userResponse.avatarVersion!);
+      User user = User(
+        id: userResponse.id!,
+        username: userResponse.username!,
+        profileVersion: userResponse.profileVersion!,
+        avatarVersion: userResponse.avatarVersion!,
+      );
       Me? oldMe = await Storage().getMe();
       if (oldMe != null && oldMe.id != user.id) {
         // new user logged in!
         await Storage().clearMe();
         SecureStorage().clearMe();
       }
-      Me me = Me(id: userResponse.id!, username: userResponse.username!, profileVersion: userResponse.profileVersion!, avatarVersion: userResponse.avatarVersion!, origin: 0);
+      Me me = Me(
+        id: userResponse.id!,
+        username: userResponse.username!,
+        profileVersion: userResponse.profileVersion!,
+        avatarVersion: userResponse.avatarVersion!,
+        origin: 0,
+      );
       if (oldMe != null) {
         // keep the old avatar path since it is probably unchanged.
         // If it is not it will detect this later
@@ -316,7 +328,7 @@ class AuthStore {
       throw Exception("User not found.");
     }
     print("successful login!");
-    SocketServices socketServices = SocketServices();
+    SocketServices();
 
     int avatarVersion = await secureStorage.getAvatarVersion();
     if (avatarVersion != loginResponse.avatarVersion) {
