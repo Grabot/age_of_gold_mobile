@@ -1,14 +1,16 @@
+import 'dart:math';
+import 'dart:typed_data';
+
+import 'package:age_of_gold_mobile/auth/user_api.dart';
 import 'package:flutter/material.dart';
 import 'package:age_of_gold_mobile/utils/auth_store.dart';
 import 'package:age_of_gold_mobile/views/components/shared_app_bar.dart';
 import 'package:age_of_gold_mobile/models/friend.dart';
-import 'package:age_of_gold_mobile/models/auth/user.dart';
 import 'package:age_of_gold_mobile/utils/storage.dart';
 import 'package:age_of_gold_mobile/auth/friends_api.dart';
 import 'package:age_of_gold_mobile/utils/utils.dart';
-import 'package:age_of_gold_mobile/models/services/user_response.dart';
-import 'package:age_of_gold_mobile/auth/auth_settings.dart';
 
+import '../../models/auth/user.dart';
 import '../age_of_gold_home/age_of_gold_home.dart';
 import '../profile/profile_page.dart';
 
@@ -23,6 +25,9 @@ class _AddFriendPageState extends State<AddFriendPage> {
   late AuthStore authStore;
   final TextEditingController _searchController = TextEditingController();
   String? searchResultUsername;
+  Uint8List? searchResultAvatar;
+  int? searchResultProfileVersion;
+  int? searchResultAvatarVersion;
   int? searchResultId;
   bool isSearching = false;
   bool isLoading = false;
@@ -52,20 +57,22 @@ class _AddFriendPageState extends State<AddFriendPage> {
     });
 
     try {
-      final response = await FriendsApi.searchFriend(query);
-      if (response.success == true) {
-        // TODO: Parse the actual user data from response
-        // For now, we'll use a mock response since the backend structure might be different
-        setState(() {
-          searchResultUsername = query;
-          searchResultId =
-              999; // This should come from the actual API response
-        });
-      } else {
-        setState(() {
-          searchResultUsername = null;
-        });
+      final userResponse = await FriendsApi.searchFriend(query);
+      if (userResponse.success = false || userResponse.id == null || userResponse.username == null || userResponse.profileVersion == null || userResponse.avatarVersion == null) {
+        throw Exception("User details are incomplete.");
       }
+      setState(() {
+        searchResultUsername = userResponse.username;
+        searchResultId = userResponse.id;
+        searchResultProfileVersion = userResponse.profileVersion;
+        searchResultAvatarVersion = userResponse.avatarVersion;
+      });
+
+      UserApi.getAvatar(userResponse.id, null).then((avatarResponse) {
+        setState(() {
+          searchResultAvatar = avatarResponse;
+        });
+      });
     } catch (e) {
       setState(() {
         searchResultUsername = null;
@@ -88,14 +95,27 @@ class _AddFriendPageState extends State<AddFriendPage> {
     try {
       final response = await FriendsApi.addFriend(searchResultId!);
       if (response.success == true) {
-        // Create a friend object
+        String avatarPath = await saveNewAvatar(searchResultAvatar!, searchResultId!);
+        User friendUser = User(
+          id: searchResultId!,
+          username: searchResultUsername!,
+          profileVersion: searchResultProfileVersion!,
+          avatarVersion: searchResultAvatarVersion!,
+          avatarPath: avatarPath,
+          shouldUpdateAvatar: false
+        );
+        friendUser.avatar = searchResultAvatar;
         final newFriend = Friend(
           friendId: searchResultId!,
           accepted: null, // Pending
           friendVersion: 1,
+          user: friendUser
         );
 
+        await Storage().saveUser(friendUser);
         await Storage().saveFriend(newFriend);
+
+        authStore.updateFriend(newFriend);
 
         if (mounted) {
           showToastMessage('Friend request sent!');
@@ -157,9 +177,29 @@ class _AddFriendPageState extends State<AddFriendPage> {
                     padding: const EdgeInsets.all(16.0),
                     child: Row(
                       children: [
-                        CircleAvatar(
-                          child: Text(
-                            searchResultUsername!.substring(0, 1).toUpperCase(),
+                        searchResultAvatar != null
+                            ? Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            image: DecorationImage(
+                              image: MemoryImage(searchResultAvatar!),
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        )
+                            : Container(
+                          width: 50,
+                          height: 50,
+                          color: getRandomColor(),
+                          child: Center(
+                            child: Text(
+                              searchResultUsername!.substring(0, 1).toUpperCase(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 16),

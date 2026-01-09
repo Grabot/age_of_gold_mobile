@@ -3,47 +3,68 @@ import 'package:age_of_gold_mobile/models/auth/user.dart';
 
 import '../../utils/storage.dart';
 
-class Me {
-  late User user;
+class Me extends User {
   final int origin;
   final bool avatarDefault;
 
-  Me({required this.user, required this.origin, this.avatarDefault = true});
-
-  int get id => user.id;
+  Me({
+    required int id,
+    required String username,
+    required int profileVersion,
+    required int avatarVersion,
+    required this.origin,
+    this.avatarDefault = true,
+    String? avatarPath,
+  }) : super(id: id, username: username, profileVersion: profileVersion, avatarVersion: avatarVersion, avatarPath: avatarPath);
 
   String toJson() {
     return jsonEncode({
-      'user': {'id': user.id, 'username': user.username},
+      'user': {
+        'id': id,
+        'username': username,
+        'profileVersion': profileVersion,
+        'avatarVersion': avatarVersion,
+        'avatarPath': avatarPath,
+      },
       'origin': origin,
       'avatarDefault': avatarDefault,
     });
   }
 
   factory Me.fromJson(Map<String, dynamic> json) {
+    final userData = json['user'];
     return Me(
-      user: User.fromJson(json['user']),
+      id: userData['id'],
+      username: userData['username'],
+      profileVersion: userData['profileVersion'],
+      avatarVersion: userData['avatarVersion'],
       origin: json['origin'],
       avatarDefault: json['avatarDefault'] as bool? ?? true,
+      avatarPath: userData['avatarPath'],
     );
   }
 
   Map<String, dynamic> toMap() {
     return {
-      'id': user.id,
-      'username': user.username,
+      'id': id,
+      'username': username,
+      'profileVersion': profileVersion,
+      'avatarVersion': avatarVersion,
       'origin': origin,
       'avatarDefault': avatarDefault ? 1 : 0,
-      'avatarPath': user.avatarPath,
+      'avatarPath': avatarPath,
     };
   }
 
   factory Me.fromMap(Map<String, dynamic> map) {
     return Me(
-      user: User.fromMap(map),
+      id: map['id'],
+      username: map['username'],
+      profileVersion: map['profileVersion'],
+      avatarVersion: map['avatarVersion'],
       origin: map['origin'],
       avatarDefault: map['avatarDefault'] == 1,
-      // avatarBytes: map['avatarBytes'] as Uint8List?,
+      avatarPath: map['avatarPath'],
     );
   }
 

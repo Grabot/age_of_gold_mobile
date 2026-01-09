@@ -11,13 +11,12 @@ import 'app_interceptors.dart';
 import 'auth_api.dart';
 
 class AuthLogin {
-  static AuthLogin? _instance;
-  factory AuthLogin() => _instance ??= AuthLogin._internal();
-  AuthLogin._internal();
+  static final Dio _dio = AuthApi.createDio();
+  static final Dio _cleanDio = CleanApi.createDio();
 
-  Future<LoginResponse> signUp(SignUpRequest signUpRequest) async {
+  static Future<LoginResponse> signUp(SignUpRequest signUpRequest) async {
     try {
-      final response = await CleanApi().dio.post(
+      final response = await _cleanDio.post(
         "${dotenv.env['API_VERSION']}/register",
         options: Options(
           headers: {HttpHeaders.contentTypeHeader: "application/json"},
@@ -38,9 +37,9 @@ class AuthLogin {
     }
   }
 
-  Future<LoginResponse> signIn(SignInRequest signInRequest) async {
+  static Future<LoginResponse> signIn(SignInRequest signInRequest) async {
     try {
-      final response = await CleanApi().dio.post(
+      final response = await _cleanDio.post(
         "${dotenv.env['API_VERSION']}/login",
         options: Options(
           headers: {HttpHeaders.contentTypeHeader: "application/json"},
@@ -61,12 +60,12 @@ class AuthLogin {
     }
   }
 
-  Future<LoginResponse> refreshToken(
+  static Future<LoginResponse> refreshToken(
     String accessToken,
     String refreshToken,
   ) async {
     try {
-      final response = await CleanApi().dio.post(
+      final response = await _cleanDio.post(
         "${dotenv.env['API_VERSION']}/login/token/refresh",
         options: Options(
           headers: {HttpHeaders.contentTypeHeader: "application/json"},
@@ -87,9 +86,9 @@ class AuthLogin {
     }
   }
 
-  Future<LoginResponse> loginToken() async {
+  static Future<LoginResponse> loginToken() async {
     try {
-      final response = await AuthApi().dio.post(
+      final response = await _dio.post(
         "${dotenv.env['API_VERSION']}/login/token",
         options: Options(
           headers: {HttpHeaders.contentTypeHeader: "application/json"},
@@ -109,9 +108,9 @@ class AuthLogin {
     }
   }
 
-  Future<LoginResponse> loginGoogleToken(String accessToken) async {
+  static Future<LoginResponse> loginGoogleToken(String accessToken) async {
     try {
-      final response = await CleanApi().dio.post(
+      final response = await _cleanDio.post(
         "${dotenv.env['API_VERSION']}/auth/google/token",
         options: Options(
           headers: {HttpHeaders.contentTypeHeader: "application/json"},
@@ -132,9 +131,9 @@ class AuthLogin {
     }
   }
 
-  Future<LoginResponse> loginAppleToken(String accessToken) async {
+  static Future<LoginResponse> loginAppleToken(String accessToken) async {
     try {
-      final response = await CleanApi().dio.post(
+      final response = await _cleanDio.post(
         "${dotenv.env['API_VERSION']}/auth/apple/token",
         options: Options(
           headers: {HttpHeaders.contentTypeHeader: "application/json"},
@@ -155,9 +154,9 @@ class AuthLogin {
     }
   }
 
-  Future<BasicResponse> logout() async {
+  static Future<BasicResponse> logout() async {
     try {
-      final response = await AuthApi().dio.post(
+      final response = await _dio.post(
         "${dotenv.env['API_VERSION']}/logout",
         options: Options(
           headers: {HttpHeaders.contentTypeHeader: "application/json"},
@@ -173,9 +172,9 @@ class AuthLogin {
     }
   }
 
-  Future<BasicResponse> forgotPassword(String email) async {
+  static Future<BasicResponse> forgotPassword(String email) async {
     try {
-      final response = await CleanApi().dio.post(
+      final response = await _cleanDio.post(
         "${dotenv.env['API_VERSION']}/password/forgot",
         options: Options(
           headers: {HttpHeaders.contentTypeHeader: "application/json"},

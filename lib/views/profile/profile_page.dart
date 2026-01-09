@@ -4,14 +4,14 @@ import 'package:age_of_gold_mobile/views/friends/friends_page.dart';
 import 'package:flutter/material.dart';
 import 'package:age_of_gold_mobile/utils/auth_store.dart';
 import 'package:age_of_gold_mobile/utils/secure_storage.dart';
-import 'package:age_of_gold_mobile/views/age_of_gold_home/dialogs/change_username_dialog.dart';
-import 'package:age_of_gold_mobile/views/age_of_gold_home/dialogs/logout_dialog.dart';
-import 'package:age_of_gold_mobile/views/age_of_gold_home/dialogs/change_avatar_dialog.dart';
-import 'package:age_of_gold_mobile/views/age_of_gold_home/dialogs/change_password_dialog.dart';
-import 'package:age_of_gold_mobile/views/age_of_gold_home/dialogs/delete_account_dialog.dart';
-import 'package:age_of_gold_mobile/auth/auth_settings.dart';
+import 'package:age_of_gold_mobile/views/profile/dialogs/change_username_dialog.dart';
+import 'package:age_of_gold_mobile/views/profile/dialogs/logout_dialog.dart';
+import 'package:age_of_gold_mobile/views/profile/dialogs/change_avatar_dialog.dart';
+import 'package:age_of_gold_mobile/views/profile/dialogs/change_password_dialog.dart';
+import 'package:age_of_gold_mobile/views/profile/dialogs/delete_account_dialog.dart';
 import 'package:age_of_gold_mobile/utils/utils.dart';
 import 'package:age_of_gold_mobile/utils/storage.dart';
+import '../../auth/settings_api.dart';
 import '../login/auth_page.dart';
 import '../components/shared_app_bar.dart';
 
@@ -30,9 +30,6 @@ class _ProfilePageState extends State<ProfilePage> {
   void initState() {
     super.initState();
     authStore = AuthStore();
-    authStore.loadUserData().then((_) {
-      setState(() {});
-    });
   }
 
   Widget _buildAvatar() {
@@ -40,16 +37,16 @@ class _ProfilePageState extends State<ProfilePage> {
       width: 120,
       height: 120,
       child:
-          authStore.me.user.avatar != null
+          authStore.me.avatar != null
               ? Image.memory(
-                authStore.me.user.avatar!,
+                authStore.me.avatar!,
                 width: 120,
                 height: 120,
                 fit: BoxFit.cover,
               )
               : Center(
                 child: Text(
-                  authStore.me.user.username.substring(0, 1).toUpperCase(),
+                  authStore.me.username.substring(0, 1).toUpperCase(),
                   style: const TextStyle(
                     fontSize: 60,
                     fontWeight: FontWeight.bold,
@@ -135,7 +132,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 _buildAvatar(),
                 const SizedBox(height: 20),
                 Text(
-                  authStore.me.user.username,
+                  authStore.me.username,
                   style: const TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -237,7 +234,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   void updatePassword(String newPassword) async {
     try {
-      await AuthSettings().updatePassword(newPassword);
+      await SettingsApi.updatePassword(newPassword);
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Password updated successfully!')),
@@ -255,8 +252,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   void updateUsername(String newUsername) async {
     try {
-      await AuthSettings().updateUsername(newUsername);
-      authStore.me.user.username = newUsername;
+      await SettingsApi.updateUsername(newUsername);
+      authStore.me.username = newUsername;
       authStore.me.save();
       int profileVersion = await SecureStorage().getProfileVersion();
       SecureStorage().setProfileVersion(profileVersion + 1);
@@ -278,7 +275,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void _showChangeUsernameDialog() {
     ChangeUsernameDialog.showChangeUsernameDialog(
       context,
-      currentUsername: authStore.me.user.username,
+      currentUsername: authStore.me.username,
       onSave: (newUsername) {
         setState(() {
           _isLoading = true;
@@ -292,9 +289,9 @@ class _ProfilePageState extends State<ProfilePage> {
   void _showDeleteAccountDialog() {
     DeleteAccountDialog.showDeleteAccountDialog(
       context,
-      onDelete: () {
+      onDelete: () async {
         try {
-          AuthSettings().deleteAccount().then((value) async {
+          await SettingsApi.deleteAccount().then((value) async {
             await Storage().clearMe();
             await SecureStorage().clearTokens();
             await SecureStorage().clearMe();
@@ -334,13 +331,13 @@ class _ProfilePageState extends State<ProfilePage> {
               _isLoading = true;
             });
             try {
-              await authStore.saveNewAvatar(image);
+              String avatarPath = await saveNewAvatar(image, authStore.me.id);
+              authStore.me.avatarPath = avatarPath;
+              authStore.me.avatar = image;
               await authStore.me.save();
-              if (authStore.me.user.avatarPath == null) {
-                throw Exception("Avatar path is not found");
-              }
-              await AuthSettings().updateAvatar(
-                authStore.me.user.avatarPath!,
+              await SecureStorage().setShouldUpdateAvatar(false);
+              await SettingsApi.updateAvatar(
+                authStore.me.avatarPath!,
                 defaultAvatar,
               );
               int avatarVersion = await SecureStorage().getAvatarVersion();

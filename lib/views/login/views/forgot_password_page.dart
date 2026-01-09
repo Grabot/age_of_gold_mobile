@@ -1,4 +1,4 @@
-import 'package:age_of_gold_mobile/auth/auth_login.dart';
+import 'package:age_of_gold_mobile/auth/login_api.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
 import '../../components/custom_form_button.dart';
@@ -101,7 +101,7 @@ class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
     if (_forgetPasswordFormKey.currentState!.validate()) {
       try {
         final email = emailController.text;
-        await AuthLogin().forgotPassword(email);
+        await AuthLogin.forgotPassword(email);
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

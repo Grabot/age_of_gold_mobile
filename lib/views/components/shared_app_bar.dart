@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:age_of_gold_mobile/utils/auth_store.dart';
 import '../age_of_gold_home/age_of_gold_home.dart';
-import '../age_of_gold_home/dialogs/logout_dialog.dart';
+import '../profile/dialogs/logout_dialog.dart';
 import '../friends/friends_page.dart';
 
 class SharedAppBar extends StatefulWidget implements PreferredSizeWidget {
@@ -52,11 +52,11 @@ class _SharedAppBarState extends State<SharedAppBar> {
       width: 40,
       height: 40,
       child:
-          authStore.me.user.avatar != null
-              ? Image.memory(authStore.me.user.avatar!)
+          authStore.me.avatar != null
+              ? Image.memory(authStore.me.avatar!)
               : Center(
                 child: Text(
-                  authStore.me.user.username.substring(0, 1).toUpperCase(),
+                  authStore.me.username.substring(0, 1).toUpperCase(),
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,

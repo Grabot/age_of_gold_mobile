@@ -2,7 +2,7 @@ import 'package:age_of_gold_mobile/utils/auth_store.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../auth/app_interceptors.dart';
-import '../auth/auth_login.dart';
+import '../auth/login_api.dart';
 import '../models/services/login_response.dart';
 import '../utils/secure_storage.dart';
 import '../utils/shared.dart';
@@ -228,7 +228,7 @@ class _OpeningScreenState extends State<OpeningScreen> {
       return;
     } else {
       try {
-        LoginResponse loginResponse = await AuthLogin().loginToken();
+        LoginResponse loginResponse = await AuthLogin.loginToken();
 
         if (!mounted) return;
         ScaffoldMessenger.of(

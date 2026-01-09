@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:email_validator/email_validator.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import '../../auth/app_interceptors.dart';
-import '../../auth/auth_login.dart';
+import '../../auth/login_api.dart';
 import '../../models/services/login_response.dart';
 import '../../models/services/sign_in_request.dart';
 import '../../models/services/sign_up_request.dart';
@@ -329,7 +329,7 @@ class _AuthPageState extends State<AuthPage> {
     final String username = _usernameController.text.trim();
     final String password = _passwordController.text.trim();
     try {
-      LoginResponse loginResponse = await AuthLogin().signUp(
+      LoginResponse loginResponse = await AuthLogin.signUp(
         SignUpRequest(email: email, username: username, password: password),
       );
       await AuthStore().handleLoginResponse(loginResponse, 0);
@@ -371,7 +371,7 @@ class _AuthPageState extends State<AuthPage> {
     final String emailOrUsername = _emailOrUsernameController.text.trim();
     final String password = _passwordController.text.trim();
     try {
-      LoginResponse? loginResponse = await AuthLogin().signIn(
+      LoginResponse? loginResponse = await AuthLogin.signIn(
         SignInRequest(emailOrUsername: emailOrUsername, password: password),
       );
       await AuthStore().handleLoginResponse(loginResponse, 0);
@@ -457,7 +457,7 @@ class _AuthPageState extends State<AuthPage> {
     try {
       final googleSignInService = GoogleSignInService();
       final accessToken = await googleSignInService.signInWithGoogle();
-      LoginResponse loginResponse = await AuthLogin().loginGoogleToken(
+      LoginResponse loginResponse = await AuthLogin.loginGoogleToken(
         accessToken,
       );
       await AuthStore().handleLoginResponse(loginResponse, 1);
@@ -486,7 +486,7 @@ class _AuthPageState extends State<AuthPage> {
       if (credential.identityToken == null) {
         throw Exception('No identity token');
       }
-      LoginResponse loginResponse = await AuthLogin().loginAppleToken(
+      LoginResponse loginResponse = await AuthLogin.loginAppleToken(
         credential.identityToken!,
       );
       await AuthStore().handleLoginResponse(loginResponse, 4);

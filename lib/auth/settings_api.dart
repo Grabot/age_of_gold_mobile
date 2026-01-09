@@ -1,60 +1,18 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
+import 'package:age_of_gold_mobile/auth/auth_api.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-import 'package:age_of_gold_mobile/models/services/user_response.dart';
-import 'package:dio/dio.dart';
-import '../../models/services/basic_response.dart';
-import 'auth_api.dart';
+import '../models/services/basic_response.dart';
+import '../models/services/user_response.dart';
 
-class AuthSettings {
-  static AuthSettings? _instance;
-  factory AuthSettings() => _instance ??= AuthSettings._internal();
-  AuthSettings._internal();
+class SettingsApi {
+  static final Dio _dio = AuthApi.createDio();
 
-  Future<UserResponse> getUserDetails() async {
+  static Future<BasicResponse> updateUsername(String newUsername) async {
     try {
-      final response = await AuthApi().dio.post(
-        "${dotenv.env['API_VERSION']}/user",
-        options: Options(
-          headers: {HttpHeaders.contentTypeHeader: "application/json"},
-        ),
-      );
-      final userResponse = UserResponse.fromJson(response.data);
-      if (userResponse.id == null || userResponse.username == null) {
-        throw Exception("Couldn't get user details");
-      }
-      return userResponse;
-    } on DioException catch (e) {
-      throw Exception(e.message);
-    }
-  }
-
-  Future<Uint8List> getAvatar(bool isDefault) async {
-    try {
-      final response = await AuthApi().dio.post(
-        "${dotenv.env['API_VERSION']}/user/avatar",
-        options: Options(
-          responseType: ResponseType.bytes,
-          headers: {HttpHeaders.contentTypeHeader: "application/json"},
-        ),
-        data: jsonEncode(<String, dynamic>{
-          "get_default": isDefault
-        }),
-      );
-      if (response.data == null) {
-        throw Exception("Couldn't get avatar");
-      }
-      return response.data;
-    } on DioException catch (e) {
-      throw Exception(e.message);
-    }
-  }
-
-  Future<BasicResponse> updateUsername(String newUsername) async {
-    try {
-      final response = await AuthApi().dio.patch(
+      final response = await _dio.patch(
         "${dotenv.env['API_VERSION']}/user/username",
         options: Options(
           headers: {HttpHeaders.contentTypeHeader: "application/json"},
@@ -71,9 +29,9 @@ class AuthSettings {
     }
   }
 
-  Future<BasicResponse> updatePassword(String newPassword) async {
+  static Future<BasicResponse> updatePassword(String newPassword) async {
     try {
-      final response = await AuthApi().dio.patch(
+      final response = await _dio.patch(
         "${dotenv.env['API_VERSION']}/password/reset",
         options: Options(
           headers: {HttpHeaders.contentTypeHeader: "application/json"},
@@ -90,10 +48,10 @@ class AuthSettings {
     }
   }
 
-  Future<BasicResponse> updateAvatar(
-    String filePath,
-    bool defaultAvatar,
-  ) async {
+  static Future<BasicResponse> updateAvatar(
+      String filePath,
+      bool defaultAvatar,
+      ) async {
     try {
       FormData? formData;
       if (!defaultAvatar) {
@@ -104,7 +62,7 @@ class AuthSettings {
         formData = FormData.fromMap(formMap);
       }
 
-      final response = await AuthApi().dio.patch(
+      final response = await _dio.patch(
         "${dotenv.env['API_VERSION']}/user/avatar",
         options: Options(
           headers: {HttpHeaders.contentTypeHeader: "application/json"},
@@ -121,9 +79,9 @@ class AuthSettings {
     }
   }
 
-  Future<BasicResponse> deleteAccount() async {
+  static Future<BasicResponse> deleteAccount() async {
     try {
-      final response = await AuthApi().dio.delete(
+      final response = await _dio.delete(
         "${dotenv.env['API_VERSION']}/delete/account",
         options: Options(
           headers: {HttpHeaders.contentTypeHeader: "application/json"},

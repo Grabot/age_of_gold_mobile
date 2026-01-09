@@ -1,22 +1,23 @@
 import 'dart:convert';
 import 'package:age_of_gold_mobile/auth/auth_api.dart';
 import 'package:age_of_gold_mobile/models/friend.dart';
+import 'package:age_of_gold_mobile/models/auth/user.dart';
 import 'package:age_of_gold_mobile/models/services/basic_response.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import '../models/services/user_response.dart';
+
 class FriendsApi {
   static final Dio _dio = AuthApi.createDio();
 
-  static Future<BasicResponse> searchFriend(String username) async {
+  static Future<UserResponse> searchFriend(String username) async {
     try {
       final response = await _dio.post(
         "${dotenv.env['API_VERSION']}/friend/search",
         data: jsonEncode({'username': username}),
       );
-      print("reseponse");
-      print(response.data);
-      return BasicResponse.fromJson(response.data);
+      return UserResponse.fromJson(response.data);
     } on DioException catch (e) {
       throw Exception('Failed to search friend: ${e.message}');
     }
@@ -101,6 +102,28 @@ class FriendsApi {
       return [];
     } on DioException catch (e) {
       throw Exception('Failed to fetch friends: ${e.message}');
+    }
+  }
+
+  static Future<List<User>> getMultipleUsers(List<int> userIds) async {
+    try {
+      final response = await _dio.post(
+        "${dotenv.env['API_VERSION']}/users",
+        data: jsonEncode({'user_ids': userIds}),
+      );
+      print("reseponse");
+      print(response.data);
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['success'] == true && data['data'] != null) {
+          final usersData = data['data'] as List;
+          return usersData.map((userData) => User.fromJson(userData)).toList();
+        }
+      }
+      return [];
+    } on DioException catch (e) {
+      throw Exception('Failed to fetch multiple users: ${e.message}');
     }
   }
 }

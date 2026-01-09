@@ -8,7 +8,6 @@ import '../../models/auth/me.dart';
 import '../../utils/socket_services.dart';
 import '../components/shared_app_bar.dart';
 import '../friends/friends_page.dart';
-import '../friends/add_friend_page.dart';
 
 class AgeOfGoldHome extends StatefulWidget {
   const AgeOfGoldHome({super.key});
@@ -24,9 +23,6 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
   void initState() {
     super.initState();
     authStore = AuthStore();
-    authStore.loadUserData().then((_) {
-      setState(() {});
-    });
   }
 
   void backButtonFunctionality() {
@@ -78,8 +74,8 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
                     MaterialPageRoute(builder: (context) => const FriendsPage()),
                   );
                 },
-                child: const Text('👥', style: TextStyle(fontSize: 24)),
                 mini: true,
+                child: const Text('👥', style: TextStyle(fontSize: 18)),
               ),
             ),
           ],

@@ -1,12 +1,12 @@
 import 'dart:typed_data';
+import 'package:age_of_gold_mobile/auth/user_api.dart';
 import 'package:flutter/material.dart';
 import 'package:age_of_gold_mobile/utils/auth_store.dart';
 import 'package:age_of_gold_mobile/utils/utils.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../../auth/auth_settings.dart';
 import '../../../utils/crop/controller.dart';
 import '../../../utils/crop/crop.dart';
-import '../camera_page.dart';
+import '../../age_of_gold_home/camera_page.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 
 class ChangeAvatarDialog extends StatefulWidget {
@@ -30,8 +30,8 @@ class ChangeAvatarDialogState extends State<ChangeAvatarDialog> {
   void initState() {
     super.initState();
     cropController = CropController();
-    imageMain = AuthStore().me.user.avatar!;
-    imageCrop = AuthStore().me.user.avatar!;
+    imageMain = AuthStore().me.avatar!;
+    imageCrop = AuthStore().me.avatar!;
   }
 
   Future<Uint8List> _compressImage(Uint8List imageBytes) async {
@@ -354,7 +354,8 @@ class ChangeAvatarDialogState extends State<ChangeAvatarDialog> {
               ? null
               : () async {
                 try {
-                  Uint8List defaultAvatarImage = await AuthSettings().getAvatar(
+                  Uint8List defaultAvatarImage = await UserApi.getAvatar(
+                    null,
                     true,
                   );
                   updateImage(defaultAvatarImage);

@@ -7,7 +7,7 @@ import 'package:age_of_gold_mobile/utils/utils.dart';
 import 'package:age_of_gold_mobile/models/services/login_response.dart';
 
 import '../../utils/auth_store.dart';
-import 'auth_login.dart';
+import 'login_api.dart';
 
 class AppInterceptors extends Interceptor {
   final Dio dio;
@@ -45,7 +45,7 @@ class AppInterceptors extends Interceptor {
             if (refreshToken == null) {
               throw Exception("refresh token is null");
             }
-            LoginResponse? loginResponse = await AuthLogin().refreshToken(
+            LoginResponse? loginResponse = await AuthLogin.refreshToken(
               accessToken,
               refreshToken,
             );
@@ -104,7 +104,7 @@ class AppInterceptors extends Interceptor {
           final refreshToken = await secureStorage.getRefreshToken();
           if (refreshToken != null && accessToken != null) {
             try {
-              LoginResponse? loginResponse = await AuthLogin().refreshToken(
+              LoginResponse? loginResponse = await AuthLogin.refreshToken(
                 accessToken,
                 refreshToken,
               );

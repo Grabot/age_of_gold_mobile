@@ -3,7 +3,7 @@ import 'package:jwt_decode/jwt_decode.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../../auth/app_interceptors.dart';
-import '../../../auth/auth_login.dart';
+import '../../../auth/login_api.dart';
 import '../../../utils/auth_store.dart';
 import '../../../utils/secure_storage.dart';
 import '../../../utils/utils.dart';
@@ -54,7 +54,7 @@ class OAuthWebviewDialogState extends State<OAuthWebviewDialog> {
                       await SecureStorage().setAccessTokenExpiration(
                         Jwt.parseJwt(accessToken)['exp'],
                       );
-                      final loginResponse = await AuthLogin().loginToken();
+                      final loginResponse = await AuthLogin.loginToken();
                       // TODO: Pass origin to oauth webview?
                       int origin = 0;
                       await AuthStore().handleLoginResponse(loginResponse, origin);
