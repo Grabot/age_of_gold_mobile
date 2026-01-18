@@ -14,6 +14,7 @@ import '../../auth/user_api.dart';
 import '../../models/auth/user.dart';
 import '../../models/services/basic_response.dart';
 import '../../models/services/user_response.dart';
+import '../groups/create_group_page.dart';
 
 class FriendsPage extends StatefulWidget {
   const FriendsPage({super.key});
@@ -115,16 +116,39 @@ class _FriendsPageState extends State<FriendsPage> {
           onRefresh: _refreshFriends,
           child: _buildFriendsContent(),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => AddFriendPage(key: UniqueKey())),
-            ).then((_) {
-              setState(() {});
-            });
-          },
-          child: const Icon(Icons.person_add),
+        floatingActionButton: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            FloatingActionButton(
+              heroTag: 'createGroupButton',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CreateGroupPage(
+                      key: UniqueKey(),
+                    ),
+                  ),
+                ).then((_) {
+                  setState(() {});
+                });
+              },
+              child: const Icon(Icons.group_add),
+            ),
+            const SizedBox(height: 8),
+            FloatingActionButton(
+              heroTag: 'addFriendButton',
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => AddFriendPage(key: UniqueKey())),
+                ).then((_) {
+                  setState(() {});
+                });
+              },
+              child: const Icon(Icons.person_add),
+            ),
+        ],
         ),
       ),
     );
