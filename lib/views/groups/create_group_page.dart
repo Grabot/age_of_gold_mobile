@@ -1,9 +1,14 @@
-import 'package:age_of_gold_mobile/utils/auth_store.dart';
 import 'package:flutter/material.dart';
-import '../../models/friend.dart';
+import 'package:age_of_gold_mobile/utils/auth_store.dart';
+import 'package:age_of_gold_mobile/models/friend.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:age_of_gold_mobile/utils/utils.dart';
+import 'package:age_of_gold_mobile/auth/groups_api.dart';
+
+import '../../models/group.dart';
+import '../../utils/storage.dart';
 
 class CreateGroupPage extends StatefulWidget {
-
   const CreateGroupPage({super.key});
 
   @override
@@ -12,15 +17,17 @@ class CreateGroupPage extends StatefulWidget {
 
 class _CreateGroupPageState extends State<CreateGroupPage> {
   final TextEditingController _groupNameController = TextEditingController();
+  final TextEditingController _groupDescriptionController = TextEditingController();
   final List<Friend> _selectedFriends = [];
   late AuthStore authStore;
+  late Color _groupColor;
 
   @override
   void initState() {
     super.initState();
     authStore = AuthStore();
+    _groupColor = getRandomColor(); // Random default color
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -34,48 +41,128 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: TextField(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
               controller: _groupNameController,
               decoration: const InputDecoration(
-                labelText: 'Group Name',
+                labelText: 'Group Name *',
                 border: OutlineInputBorder(),
               ),
             ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: authStore.friends.length,
-              itemBuilder: (context, index) {
-                final friend = authStore.friends[index];
-                return CheckboxListTile(
-                  title: Text(friend.user?.username ?? 'Unknown'),
-                  value: _selectedFriends.contains(friend),
-                  onChanged: (bool? selected) {
-                    setState(() {
-                      if (selected == true) {
-                        _selectedFriends.add(friend);
-                      } else {
-                        _selectedFriends.remove(friend);
-                      }
-                    });
-                  },
-                );
-              },
+            const SizedBox(height: 16),
+            TextField(
+              controller: _groupDescriptionController,
+              decoration: const InputDecoration(
+                labelText: 'Group Description',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 3,
             ),
-          ),
-        ],
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                const Text('Group Color: '),
+                GestureDetector(
+                  onTap: () => _pickColor(context),
+                  child: Container(
+                    width: 30,
+                    height: 30,
+                    decoration: BoxDecoration(
+                      color: _groupColor,
+                      border: Border.all(),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Text('Select Friends to Add'),
+            Expanded(
+              child: ListView.builder(
+                itemCount: authStore.friends.length,
+                itemBuilder: (context, index) {
+                  final friend = authStore.friends[index];
+                  return CheckboxListTile(
+                    contentPadding: EdgeInsets.zero,
+                    title: Center(
+                      child: Text(friend.user?.username ?? 'Unknown'),
+                    ),
+                    value: _selectedFriends.contains(friend),
+                    onChanged: (bool? selected) {
+                      setState(() {
+                        if (selected == true) {
+                          _selectedFriends.add(friend);
+                        } else {
+                          _selectedFriends.remove(friend);
+                        }
+                      });
+                    },
+                  );
+                },
+              ),
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Cancel'),
+                ),
+                const SizedBox(width: 16),
+                ElevatedButton(
+                  onPressed: _createGroup,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0B9476),
+                  ),
+                  child: const Text('Create Group'),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  void _createGroup() {
+  void _pickColor(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Pick a color', style: TextStyle(fontSize: 18)),
+              const SizedBox(height: 16),
+              ColorPicker(
+                pickerColor: _groupColor,
+                onColorChanged: (color) {
+                  setState(() => _groupColor = color);
+                },
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+  Future<void> _createGroup() async {
     if (_groupNameController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a group name')),
+        const SnackBar(content: Text('Group name is required')),
       );
       return;
     }
@@ -85,7 +172,41 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
       );
       return;
     }
-    // TODO: Call API to create group
-    Navigator.pop(context);
+
+    try {
+      final groupId = await GroupsApi.createGroup(
+        groupName: _groupNameController.text.trim(),
+        groupDescription: _groupDescriptionController.text.trim(),
+        groupColour: _groupColor.value.toRadixString(16).substring(2, 8),
+        friendIds: _selectedFriends.map((friend) => friend.friendId).toList(),
+      );
+
+      // Create and save the new group
+      final newGroup = Group(
+        groupId: groupId,
+        groupVersion: 1, // Initial version
+        groupName: _groupNameController.text.trim(),
+        groupDescription: _groupDescriptionController.text.trim(),
+        groupColour: _groupColor.value.toRadixString(16).substring(2, 8),
+        userIds: _selectedFriends.map((friend) => friend.friendId).toList(),
+        adminIds: [authStore.me.id], // Assuming the creator is an admin
+        shouldUpdateAvatar: false,
+      );
+
+      // Save to storage
+      await Storage().saveGroup(newGroup);
+
+      // Update authStore (assuming you have a groups list in AuthStore)
+      authStore.addGroup(newGroup);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Group created successfully!')),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to create group: ${e.toString()}')),
+      );
+    }
   }
 }

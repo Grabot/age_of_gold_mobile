@@ -132,8 +132,8 @@ class SocketServices extends ChangeNotifier {
 
       final newFriend = Friend(
         friendId: friendId,
-        accepted: false,
         friendVersion: 1,
+        accepted: false,
         user: User(
           id: friendId,
           username: username,
@@ -170,8 +170,8 @@ class SocketServices extends ChangeNotifier {
 
       final updatedFriend = Friend(
         friendId: friendId,
-        accepted: accepted,
         friendVersion: friendVersion,
+        accepted: accepted,
         user: User(
           id: friendId,
           username: username,

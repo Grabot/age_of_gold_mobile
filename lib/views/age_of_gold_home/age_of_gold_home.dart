@@ -8,6 +8,7 @@ import '../../models/auth/me.dart';
 import '../../utils/socket_services.dart';
 import '../components/shared_app_bar.dart';
 import '../friends/friends_page.dart';
+import '../groups/groups_page.dart'; // Import the GroupsPage
 
 class AgeOfGoldHome extends StatefulWidget {
   const AgeOfGoldHome({super.key});
@@ -39,7 +40,6 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     return PopScope(
@@ -56,26 +56,44 @@ class _AgeOfGoldHomeState extends State<AgeOfGoldHome> {
           friendsPage: const FriendsPage(),
           showHomeOption: false,
           showProfileOption: true,
-          showFriendsOption: true,
+          showFriendsOption: false, // Disable friends option in app bar
           showBackButton: false,
           backButtonFunctionality: backButtonFunctionality,
         ),
         body: Stack(
           children: [
             const Center(child: Text('TODO', style: TextStyle(fontSize: 24))),
+            // Buttons positioned at bottom-right
             Positioned(
-              top: 30,
-              left: 30,
-              child: FloatingActionButton(
-                heroTag: 'friendsButton',
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const FriendsPage()),
-                  );
-                },
-                mini: true,
-                child: const Text('👥', style: TextStyle(fontSize: 18)),
+              bottom: 30,
+              right: 20,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  // Friends button
+                  FloatingActionButton(
+                    heroTag: 'friendsButton',
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const FriendsPage()),
+                      );
+                    },
+                    child: const Text('👥', style: TextStyle(fontSize: 20)),
+                  ),
+                  const SizedBox(height: 10),
+                  // Groups button
+                  FloatingActionButton(
+                    heroTag: 'groupsButton',
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const GroupsPage()),
+                      );
+                    },
+                    child: const Text('👥👥', style: TextStyle(fontSize: 20)),
+                  ),
+                ],
               ),
             ),
           ],

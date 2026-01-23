@@ -1,4 +1,5 @@
 import '../friend.dart';
+import '../group.dart';
 
 class LoginResponse {
   String? accessToken;
@@ -6,6 +7,7 @@ class LoginResponse {
   int? profileVersion;
   int? avatarVersion;
   List<Friend>? friends;
+  List<Group>? groups;
 
   LoginResponse.fromJson(Map<String, dynamic> json) {
     if (json.containsKey("success") && json["success"]) {
@@ -26,6 +28,7 @@ class LoginResponse {
         if (data.containsKey("friends")) {
           friends = List<Friend>.from(data["friends"].map((x) => Friend.fromJson(x)));
         }
+        // TODO: How to do groups? They only give group_versions. How to handle this?
       }
     }
   }

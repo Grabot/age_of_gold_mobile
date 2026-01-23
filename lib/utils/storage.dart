@@ -1,17 +1,16 @@
 import 'dart:io';
-
+import 'dart:convert';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 
 import '../models/auth/me.dart';
 import '../models/friend.dart';
 import '../models/auth/user.dart';
+import '../models/group.dart';
 
 class Storage {
   static const _dbName = "age_of_gold.db";
-
   static final Storage _instance = Storage._internal();
-
   Database? based;
 
   factory Storage() {
@@ -32,7 +31,7 @@ class Storage {
 
     return await openDatabase(
       path,
-      version: 2,
+      version: 3, // Incremented to add Group table
       onCreate: _onCreate,
       onUpgrade: _onUpgrade,
     );
@@ -42,12 +41,16 @@ class Storage {
     await createTableMe(db);
     await createTableFriend(db);
     await createTableUser(db);
+    await createTableGroup(db);
   }
 
   Future _onUpgrade(Database db, int oldVersion, int newVersion) async {
     if (oldVersion == 1 && newVersion >= 2) {
       await createTableFriend(db);
       await createTableUser(db);
+    }
+    if (oldVersion < 3) {
+      await createTableGroup(db);
     }
   }
 
@@ -91,6 +94,31 @@ class Storage {
     ''');
   }
 
+  createTableGroup(Database db) async {
+    await db.execute('''
+      CREATE TABLE `Group` (
+        groupId INTEGER PRIMARY KEY,
+        groupVersion INTEGER NOT NULL,
+        unreadMessages INTEGER,
+        mute INTEGER,
+        muteTimestamp TEXT,
+        messageVersion INTEGER,
+        avatarVersion INTEGER,
+        lastMessageReadId INTEGER,
+        userIds TEXT,
+        adminIds TEXT,
+        groupName TEXT NOT NULL,
+        private INTEGER,
+        groupDescription TEXT,
+        groupColour TEXT NOT NULL,
+        currentMessageId INTEGER,
+        avatarPath TEXT,
+        shouldUpdateAvatar INTEGER DEFAULT 0,
+        UNIQUE(groupId) ON CONFLICT REPLACE
+      );
+    ''');
+  }
+
   Future<void> saveMe(Me me) async {
     try {
       final db = await database;
@@ -100,7 +128,6 @@ class Storage {
         conflictAlgorithm: ConflictAlgorithm.replace,
       );
     } catch (e) {
-      // logger.e('Failed to save Me: $e');
       rethrow;
     }
   }
@@ -112,7 +139,6 @@ class Storage {
       if (maps.isEmpty) return null;
       return Me.fromMap(maps.first);
     } catch (e) {
-      // logger.e('Failed to get Me: $e');
       return null;
     }
   }
@@ -128,7 +154,6 @@ class Storage {
       }
       await db.delete('Me');
     } catch (e) {
-      // logger.e('Failed to clear Me: $e');
       rethrow;
     }
   }
@@ -138,9 +163,11 @@ class Storage {
     await database.execute("DROP TABLE IF EXISTS Me");
     await database.execute("DROP TABLE IF EXISTS Friend");
     await database.execute("DROP TABLE IF EXISTS User");
+    await database.execute("DROP TABLE IF EXISTS `Group`");
     await createTableMe(database);
     await createTableFriend(database);
     await createTableUser(database);
+    await createTableGroup(database);
   }
 
   Future<void> saveFriend(Friend friend) async {
@@ -173,7 +200,7 @@ class Storage {
   Future<void> clearFriends() async {
     try {
       final db = await database;
-      await db.delete('Friends');
+      await db.delete('Friend');
     } catch (e) {
       rethrow;
     }
@@ -186,7 +213,7 @@ class Storage {
         'Friend',
         {
           'accepted':
-              friend.accepted != null ? (friend.accepted! ? 1 : 0) : null,
+          friend.accepted != null ? (friend.accepted! ? 1 : 0) : null,
           'friendVersion': friend.friendVersion,
         },
         where: 'friendId = ?',
@@ -206,7 +233,6 @@ class Storage {
     }
   }
 
-  // User methods
   Future<void> saveUser(User user) async {
     try {
       final db = await database;
@@ -236,16 +262,16 @@ class Storage {
         whereArgs: [userId],
         limit: 1,
       );
-       if (maps.isEmpty) return null;
-       return User(
-         id: maps.first['id'] as int,
-         username: maps.first['username'] as String,
-         avatarVersion: maps.first['avatarVersion'] as int,
-         profileVersion: maps.first['profileVersion'] as int,
-         avatarPath: maps.first['avatarPath'] as String?,
-         shouldUpdateAvatar: maps.first['shouldUpdateAvatar'] == 1,
-       );
-     } catch (e) {
+      if (maps.isEmpty) return null;
+      return User(
+        id: maps.first['id'] as int,
+        username: maps.first['username'] as String,
+        avatarVersion: maps.first['avatarVersion'] as int,
+        profileVersion: maps.first['profileVersion'] as int,
+        avatarPath: maps.first['avatarPath'] as String?,
+        shouldUpdateAvatar: maps.first['shouldUpdateAvatar'] == 1,
+      );
+    } catch (e) {
       return null;
     }
   }
@@ -261,15 +287,15 @@ class Storage {
       );
       return maps
           .map(
-             (map) => User(
-               id: map['id'] as int,
-               username: map['username'] as String,
-               avatarVersion: map['avatarVersion'] as int,
-               profileVersion: map['profileVersion'] as int,
-               avatarPath: map['avatarPath'] as String?,
-               shouldUpdateAvatar: map['shouldUpdateAvatar'] == 1,
-             ),
-          )
+            (map) => User(
+          id: map['id'] as int,
+          username: map['username'] as String,
+          avatarVersion: map['avatarVersion'] as int,
+          profileVersion: map['profileVersion'] as int,
+          avatarPath: map['avatarPath'] as String?,
+          shouldUpdateAvatar: map['shouldUpdateAvatar'] == 1,
+        ),
+      )
           .toList();
     } catch (e) {
       return [];
@@ -316,6 +342,82 @@ class Storage {
         where: 'id = ?',
         whereArgs: [user.id],
       );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  // Group methods
+  Future<void> saveGroup(Group group) async {
+    try {
+      final db = await database;
+      await db.insert(
+        '`Group`',
+        group.toMap(),
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<Group?> getGroup(int groupId) async {
+    try {
+      final db = await database;
+      final maps = await db.query(
+        '`Group`',
+        where: 'groupId = ?',
+        whereArgs: [groupId],
+        limit: 1,
+      );
+      if (maps.isEmpty) return null;
+      return Group.fromMap(maps.first);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<List<Group>> getGroups() async {
+    try {
+      final db = await database;
+      final maps = await db.query('`Group`');
+      return maps.map((map) => Group.fromMap(map)).toList();
+    } catch (e) {
+      return [];
+    }
+  }
+
+  Future<void> updateGroup(Group group) async {
+    try {
+      final db = await database;
+      await db.update(
+        '`Group`',
+        group.toMap(),
+        where: 'groupId = ?',
+        whereArgs: [group.groupId],
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> deleteGroup(int groupId) async {
+    try {
+      final db = await database;
+      await db.delete(
+        '`Group`',
+        where: 'groupId = ?',
+        whereArgs: [groupId],
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  Future<void> clearGroups() async {
+    try {
+      final db = await database;
+      await db.delete('`Group`');
     } catch (e) {
       rethrow;
     }

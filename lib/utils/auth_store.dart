@@ -11,8 +11,10 @@ import '../auth/user_api.dart';
 import '../models/auth/me.dart';
 import '../models/auth/user.dart';
 import '../models/friend.dart';
+import '../models/group.dart';
 import '../models/services/login_response.dart';
 import '../auth/friends_api.dart';
+import '../auth/groups_api.dart';
 import 'package:age_of_gold_mobile/constants/route_paths.dart' as routes;
 import '../views/login/auth_page.dart';
 import 'navigation_service.dart';
@@ -30,8 +32,10 @@ class AuthStore {
 
   Me? _me;
   List<Friend> _friends = [];
+  List<Group> _groups = [];
 
   List<Friend> get friends => _friends;
+  List<Group> get groups => _groups;
 
   Me get me {
     if (_me == null) {
@@ -48,6 +52,10 @@ class AuthStore {
     _friends = friends;
   }
 
+  void setGroups(List<Group> groups) {
+    _groups = groups;
+  }
+
   void updateFriend(Friend friend) {
     final index = _friends.indexWhere((f) => f.friendId == friend.friendId);
     if (index >= 0) {
@@ -57,15 +65,24 @@ class AuthStore {
     }
   }
 
+  void addGroup(Group group) {
+    final index = _groups.indexWhere((g) => g.groupId == group.groupId);
+    if (index >= 0) {
+      _groups[index] = group;
+    } else {
+      _groups.add(group);
+    }
+  }
+
   Future<bool> getUserDetails(LoginResponse loginResponse, int? origin) async {
     try {
       UserResponse userResponse = await UserApi.getUser(null);
       if (userResponse.success =
           false ||
-          userResponse.id == null ||
-          userResponse.username == null ||
-          userResponse.profileVersion == null ||
-          userResponse.avatarVersion == null) {
+              userResponse.id == null ||
+              userResponse.username == null ||
+              userResponse.profileVersion == null ||
+              userResponse.avatarVersion == null) {
         throw Exception("User details are incomplete.");
       }
       User user = User(
@@ -115,9 +132,9 @@ class AuthStore {
   }
 
   Future<void> retrieveMissingFriends(
-    List<int> friendIds,
-    String accessToken,
-  ) async {
+      List<int> friendIds,
+      String accessToken,
+      ) async {
     if (friendIds.isEmpty) {
       return;
     }
@@ -135,8 +152,8 @@ class AuthStore {
           // Create the friend object
           final friend = Friend(
             friendId: friendData.friendId,
-            accepted: friendData.accepted,
             friendVersion: friendData.friendVersion,
+            accepted: friendData.accepted,
             user: storedUser,
           );
 
@@ -154,9 +171,9 @@ class AuthStore {
   }
 
   Future<void> retrieveMissingUsers(
-    List<int> userIds,
-    String accessToken,
-  ) async {
+      List<int> userIds,
+      String accessToken,
+      ) async {
     if (userIds.isEmpty) {
       return;
     }
@@ -199,6 +216,34 @@ class AuthStore {
       }
     } catch (error) {
       print('Failed to retrieve missing users: $error');
+      rethrow;
+    }
+  }
+
+  Future<void> retrieveMissingGroups(
+      List<int> groupIds,
+      String accessToken,
+      ) async {
+    if (groupIds.isEmpty) {
+      return;
+    }
+
+    try {
+      // Call the backend API to fetch groups
+      final groupsResponse = await GroupsApi.fetchGroups(groupIds: groupIds);
+
+      if (groupsResponse.isNotEmpty) {
+        // Process each group from the response
+        for (final group in groupsResponse) {
+          // Save to storage
+          await Storage().saveGroup(group);
+
+          // Update in-memory store
+          addGroup(group);
+        }
+      }
+    } catch (error) {
+      print('Failed to retrieve missing groups: $error');
       rethrow;
     }
   }
@@ -269,11 +314,43 @@ class AuthStore {
     }
   }
 
+  Future<void> _handleLoginGroups(LoginResponse loginResponse) async {
+    // Track group IDs that need retrieval
+    final groupIdsToRetrieve = <int>[];
+
+    // Process each group from the login response
+    for (final groupLogin in loginResponse.groups!) {
+      // Check if we have stored group data or need to retrieve it
+      final storedGroup = await Storage().getGroup(groupLogin.groupId);
+
+      // Check if group needs retrieval or update
+      if (storedGroup == null ||
+          storedGroup.groupVersion != groupLogin.groupVersion) {
+        groupIdsToRetrieve.add(groupLogin.groupId);
+      }
+    }
+
+    // Retrieve missing group data
+    if (groupIdsToRetrieve.isNotEmpty) {
+      await retrieveMissingGroups(
+        groupIdsToRetrieve,
+        loginResponse.accessToken!,
+      );
+    }
+  }
+
   Future<void> loadUserData() async {
     final shouldUpdate = await SecureStorage().getShouldUpdateAvatar();
     if (shouldUpdate) {
       await updateAvatar();
     }
+
+    // Load groups from storage
+    final storedGroups = await Storage().getGroups();
+    if (storedGroups.isNotEmpty) {
+      setGroups(storedGroups);
+    }
+
     return;
   }
 
@@ -350,6 +427,11 @@ class AuthStore {
       await _handleLoginFriends(loginResponse);
     }
 
+    // Handle groups from login response
+    if (loginResponse.groups != null && loginResponse.groups!.isNotEmpty) {
+      await _handleLoginGroups(loginResponse);
+    }
+
     await updateValidationTimestamp();
   }
 
@@ -390,6 +472,7 @@ class AuthStore {
   Future<void> logout(BuildContext context) async {
     try {
       await Storage().clearMe();
+      await Storage().clearGroups();
       await SecureStorage().clearTokens();
       await SecureStorage().clearMe();
       Navigator.pushReplacement(

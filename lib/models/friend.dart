@@ -2,22 +2,22 @@ import 'package:age_of_gold_mobile/models/auth/user.dart';
 
 class Friend {
   final int friendId;
-  bool? accepted;
   final int friendVersion;
+  bool? accepted;
   User? user;
 
   Friend({
     required this.friendId,
-    this.accepted,
     required this.friendVersion,
+    this.accepted,
     this.user,
   });
 
   factory Friend.fromJson(Map<String, dynamic> json) {
     return Friend(
       friendId: json['friend_id'] as int,
-      accepted: json['accepted'] as bool?,
       friendVersion: json['friend_version'] as int,
+      accepted: json['accepted'] as bool?,
       user: json['user'] != null ? User.fromJson(json['user']) : null,
     );
   }
@@ -25,8 +25,8 @@ class Friend {
   Map<String, dynamic> toJson() {
     return {
       'friendId': friendId,
-      'accepted': accepted,
       'friendVersion': friendVersion,
+      'accepted': accepted,
       'user': user?.toMap(),
     };
   }
@@ -34,8 +34,8 @@ class Friend {
   Map<String, dynamic> toMap() {
     return {
       'friendId': friendId,
-      'accepted': accepted != null ? (accepted! ? 1 : 0) : null,
       'friendVersion': friendVersion,
+      'accepted': accepted != null ? (accepted! ? 1 : 0) : null,
       'id': user?.id,
       'username': user?.username,
       'profileVersion': user?.profileVersion,
@@ -47,8 +47,8 @@ class Friend {
   factory Friend.fromMap(Map<String, dynamic> map) {
     return Friend(
       friendId: map['friend_id'] as int,
-      accepted: map['accepted'] != null ? (map['accepted'] == 1) : null,
       friendVersion: map['friend_version'] as int,
+      accepted: map['accepted'] != null ? (map['accepted'] == 1) : null,
       user:
           map['user_id_fk'] != null
               ? User(

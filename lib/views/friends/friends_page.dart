@@ -116,39 +116,17 @@ class _FriendsPageState extends State<FriendsPage> {
           onRefresh: _refreshFriends,
           child: _buildFriendsContent(),
         ),
-        floatingActionButton: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            FloatingActionButton(
-              heroTag: 'createGroupButton',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => CreateGroupPage(
-                      key: UniqueKey(),
-                    ),
-                  ),
-                ).then((_) {
-                  setState(() {});
-                });
-              },
-              child: const Icon(Icons.group_add),
-            ),
-            const SizedBox(height: 8),
-            FloatingActionButton(
-              heroTag: 'addFriendButton',
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AddFriendPage(key: UniqueKey())),
-                ).then((_) {
-                  setState(() {});
-                });
-              },
-              child: const Icon(Icons.person_add),
-            ),
-        ],
+        floatingActionButton: FloatingActionButton(
+          heroTag: 'addFriendButton',
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => AddFriendPage(key: UniqueKey())),
+            ).then((_) {
+              setState(() {});
+            });
+          },
+          child: const Icon(Icons.person_add),
         ),
       ),
     );
