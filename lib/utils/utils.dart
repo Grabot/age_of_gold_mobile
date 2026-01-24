@@ -42,6 +42,13 @@ Future<String> saveNewAvatar(Uint8List avatarBytes, int userId) async {
   return avatarFile.path;
 }
 
+Future<String> saveNewGroupAvatar(Uint8List avatarBytes, int groupId) async {
+  final appDir = await getApplicationDocumentsDirectory();
+  final avatarFile = File('${appDir.path}/avatar_group_$groupId.png');
+  await avatarFile.writeAsBytes(avatarBytes);
+  return avatarFile.path;
+}
+
 Future<Uint8List> loadAvatarBytes(String avatarPath) async {
   final avatarFile = File(avatarPath);
   return await avatarFile.readAsBytes();

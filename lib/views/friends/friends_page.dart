@@ -36,12 +36,20 @@ class _FriendsPageState extends State<FriendsPage> {
   }
 
   getUserAvatar(Friend friend) async {
-    final avatarBytes = await UserApi.getAvatar(friend.friendId, null);
-    String avatarPath = await saveNewAvatar(avatarBytes, friend.friendId);
-    friend.user!.avatarPath = avatarPath;
-    friend.user!.avatar = avatarBytes;
-    friend.user!.shouldUpdateAvatar = false;
-    await Storage().updateUser(friend.user!);
+    try {
+      final avatarBytes = await UserApi.getAvatar(friend.friendId, null);
+      String avatarPath = await saveNewAvatar(avatarBytes, friend.friendId);
+      // TODO: Get avatar version?
+      int newAvatarVersion = await UserApi.getAvatarVersion(friend.friendId);
+      friend.user!.avatarPath = avatarPath;
+      friend.user!.avatar = avatarBytes;
+      friend.user!.avatarVersion = newAvatarVersion;
+      friend.user!.shouldUpdateAvatar = false;
+      await Storage().updateUser(friend.user!);
+    } catch (e) {
+      print("Error getting avatar: $e");
+      return;
+    }
   }
 
   loadUserAvatar(Friend friend) async {

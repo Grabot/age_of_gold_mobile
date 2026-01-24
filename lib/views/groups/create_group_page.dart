@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:age_of_gold_mobile/utils/auth_store.dart';
 import 'package:age_of_gold_mobile/models/friend.dart';
@@ -66,7 +68,7 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
               children: [
                 const Text('Group Color: '),
                 GestureDetector(
-                  onTap: () => _pickColor(context),
+                  onTap: () => _pickColor(),
                   child: Container(
                     width: 30,
                     height: 30,
@@ -127,7 +129,7 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
     );
   }
 
-  void _pickColor(BuildContext context) {
+  void _pickColor() {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -177,36 +179,48 @@ class _CreateGroupPageState extends State<CreateGroupPage> {
       final groupId = await GroupsApi.createGroup(
         groupName: _groupNameController.text.trim(),
         groupDescription: _groupDescriptionController.text.trim(),
-        groupColour: _groupColor.value.toRadixString(16).substring(2, 8),
+        groupColour: _groupColor.toARGB32().toRadixString(16).substring(2, 8),
         friendIds: _selectedFriends.map((friend) => friend.friendId).toList(),
       );
 
-      // Create and save the new group
       final newGroup = Group(
         groupId: groupId,
-        groupVersion: 1, // Initial version
+        groupVersion: 1,
         groupName: _groupNameController.text.trim(),
         groupDescription: _groupDescriptionController.text.trim(),
-        groupColour: _groupColor.value.toRadixString(16).substring(2, 8),
+        groupColour: _groupColor.toARGB32().toRadixString(16).substring(2, 8),
         userIds: _selectedFriends.map((friend) => friend.friendId).toList(),
-        adminIds: [authStore.me.id], // Assuming the creator is an admin
+        adminIds: [authStore.me.id],
         shouldUpdateAvatar: false,
       );
 
-      // Save to storage
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Group created successfully!')),
+        );
+      }
+      // Slight delay and then retrieve the avatar
+      await Future.delayed(const Duration(seconds: 1));
+      try {
+        Uint8List groupAvatar = await GroupsApi.getGroupAvatar(groupId);
+        newGroup.avatar = groupAvatar;
+        newGroup.avatarPath = await saveNewGroupAvatar(groupAvatar, groupId);
+        print("it managed to retrieve the avatar");
+      } catch (e) {
+        print('Failed to retrieve group avatar: $e');
+        newGroup.shouldUpdateAvatar = true;
+      }
       await Storage().saveGroup(newGroup);
-
-      // Update authStore (assuming you have a groups list in AuthStore)
       authStore.addGroup(newGroup);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Group created successfully!')),
-      );
-      Navigator.pop(context);
+      if (mounted) {
+        Navigator.pop(context);
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to create group: ${e.toString()}')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to create group: ${e.toString()}')),
+        );
+      }
     }
   }
 }

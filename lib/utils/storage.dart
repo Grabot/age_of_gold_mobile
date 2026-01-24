@@ -330,24 +330,27 @@ class Storage {
   Future<void> updateUser(User user) async {
     try {
       final db = await database;
-      await db.update(
-        'User',
-        {
-          'username': user.username,
-          'avatarVersion': user.avatarVersion,
-          'profileVersion': user.profileVersion,
-          'avatarPath': user.avatarPath,
-          'shouldUpdateAvatar': user.shouldUpdateAvatar ? 1 : 0,
-        },
-        where: 'id = ?',
-        whereArgs: [user.id],
-      );
+      final Map<String, dynamic> updates = {};
+      updates['username'] = user.username;
+      updates['avatarVersion'] = user.avatarVersion;
+      updates['profileVersion'] = user.profileVersion;
+      updates["shouldUpdateAvatar"] = user.shouldUpdateAvatar ? 1 : 0;
+      if (user.avatarPath != null) {
+        updates['avatarPath'] = user.avatarPath;
+      }
+      if (updates.isNotEmpty) {
+        await db.update(
+          'User',
+          updates,
+          where: 'id = ?',
+          whereArgs: [user.id],
+        );
+      }
     } catch (e) {
       rethrow;
     }
   }
 
-  // Group methods
   Future<void> saveGroup(Group group) async {
     try {
       final db = await database;
@@ -390,6 +393,7 @@ class Storage {
   Future<void> updateGroup(Group group) async {
     try {
       final db = await database;
+      // Only update fields from the server? No shoudUpdateAvatar and avatarPath
       await db.update(
         '`Group`',
         group.toMap(),

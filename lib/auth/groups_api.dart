@@ -26,7 +26,7 @@ class GroupsApi {
         }),
       );
       if (response.statusCode == 200 && response.data['success'] == true) {
-        return response.data['data'] as int; // Return the created group ID
+        return response.data['data'] as int;
       }
       throw Exception('Failed to create group: Invalid response');
     } on DioException catch (e) {
@@ -42,7 +42,7 @@ class GroupsApi {
       );
       if (response.statusCode == 200 && response.data['success'] == true) {
         final groupsData = response.data['data'] as List;
-        return groupsData.map((groupData) => Group.fromJson(groupData)).toList();
+        return groupsData.map((groupData) => Group.fromMap(groupData)).toList();
       }
       return [];
     } on DioException catch (e) {

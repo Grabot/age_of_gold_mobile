@@ -133,7 +133,6 @@ class AuthStore {
 
   Future<void> retrieveMissingFriends(
       List<int> friendIds,
-      String accessToken,
       ) async {
     if (friendIds.isEmpty) {
       return;
@@ -148,6 +147,7 @@ class AuthStore {
         for (final friendData in friendsResponse) {
           // Get the stored user if available
           final storedUser = await Storage().getUser(friendData.friendId);
+          final storedFriend = await Storage().getFriendByFriendId(friendData.friendId);
 
           // Create the friend object
           final friend = Friend(
@@ -157,10 +157,12 @@ class AuthStore {
             user: storedUser,
           );
 
-          // Save to storage
-          await Storage().saveFriend(friend);
+          if (storedFriend != null) {
+            await Storage().updateFriend(friend);
+          } else {
+            await Storage().saveFriend(friend);
+          }
 
-          // Update in-memory store
           updateFriend(friend);
         }
       }
@@ -172,7 +174,6 @@ class AuthStore {
 
   Future<void> retrieveMissingUsers(
       List<int> userIds,
-      String accessToken,
       ) async {
     if (userIds.isEmpty) {
       return;
@@ -222,7 +223,6 @@ class AuthStore {
 
   Future<void> retrieveMissingGroups(
       List<int> groupIds,
-      String accessToken,
       ) async {
     if (groupIds.isEmpty) {
       return;
@@ -233,12 +233,15 @@ class AuthStore {
       final groupsResponse = await GroupsApi.fetchGroups(groupIds: groupIds);
 
       if (groupsResponse.isNotEmpty) {
-        // Process each group from the response
         for (final group in groupsResponse) {
-          // Save to storage
-          await Storage().saveGroup(group);
+          final storedGroup = await Storage().getGroup(group.groupId);
 
-          // Update in-memory store
+          if (storedGroup != null) {
+            await Storage().updateGroup(group);
+          } else {
+            await Storage().saveGroup(group);
+          }
+
           addGroup(group);
         }
       }
@@ -304,13 +307,14 @@ class AuthStore {
     if (friendIdsToRetrieve.isNotEmpty) {
       await retrieveMissingFriends(
         friendIdsToRetrieve,
-        loginResponse.accessToken!,
       );
     }
 
     // Retrieve missing user data
     if (userIdsToRetrieve.isNotEmpty) {
-      await retrieveMissingUsers(userIdsToRetrieve, loginResponse.accessToken!);
+      await retrieveMissingUsers(
+          userIdsToRetrieve
+      );
     }
   }
 
@@ -334,7 +338,6 @@ class AuthStore {
     if (groupIdsToRetrieve.isNotEmpty) {
       await retrieveMissingGroups(
         groupIdsToRetrieve,
-        loginResponse.accessToken!,
       );
     }
   }

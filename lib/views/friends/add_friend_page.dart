@@ -58,8 +58,15 @@ class _AddFriendPageState extends State<AddFriendPage> {
 
     try {
       final userResponse = await FriendsApi.searchFriend(query);
-      if (userResponse.success = false || userResponse.id == null || userResponse.username == null || userResponse.profileVersion == null || userResponse.avatarVersion == null) {
-        throw Exception("User details are incomplete.");
+      if (userResponse.success == false ||
+          userResponse.id == null ||
+          userResponse.username == null ||
+          userResponse.profileVersion == null ||
+          userResponse.avatarVersion == null) {
+        setState(() {
+          isSearching = true;
+        });
+        return;
       }
       setState(() {
         searchResultUsername = userResponse.username;
@@ -97,19 +104,19 @@ class _AddFriendPageState extends State<AddFriendPage> {
       if (response.success == true) {
         String avatarPath = await saveNewAvatar(searchResultAvatar!, searchResultId!);
         User friendUser = User(
-          id: searchResultId!,
-          username: searchResultUsername!,
-          profileVersion: searchResultProfileVersion!,
-          avatarVersion: searchResultAvatarVersion!,
-          avatarPath: avatarPath,
-          shouldUpdateAvatar: false
+            id: searchResultId!,
+            username: searchResultUsername!,
+            profileVersion: searchResultProfileVersion!,
+            avatarVersion: searchResultAvatarVersion!,
+            avatarPath: avatarPath,
+            shouldUpdateAvatar: false
         );
         friendUser.avatar = searchResultAvatar;
         final newFriend = Friend(
-          friendId: searchResultId!,
-          accepted: null, // Pending
-          friendVersion: 1,
-          user: friendUser
+            friendId: searchResultId!,
+            accepted: null, // Pending
+            friendVersion: 1,
+            user: friendUser
         );
 
         await Storage().saveUser(friendUser);
@@ -145,12 +152,12 @@ class _AddFriendPageState extends State<AddFriendPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: SharedAppBar(
-          title: 'Add Friend',
-          homePage: const AgeOfGoldHome(),
-          profilePage: const ProfilePage(),
-          showProfileOption: true,
-          showHomeOption: true,
-          backButtonFunctionality: backButtonFunctionality
+        title: 'Add Friend',
+        homePage: const AgeOfGoldHome(),
+        profilePage: const ProfilePage(),
+        showProfileOption: true,
+        showHomeOption: true,
+        backButtonFunctionality: backButtonFunctionality,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -203,10 +210,21 @@ class _AddFriendPageState extends State<AddFriendPage> {
                           ),
                         ),
                         const SizedBox(width: 16),
-                        Text(searchResultUsername!),
+                        Expanded(
+                          child: Center(
+                            child: Text(
+                              searchResultUsername!,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        ),
                         const Spacer(),
                         ElevatedButton(
-                          onPressed: searchResultId == null || searchResultAvatar == null || searchResultUsername == null ? null : _addFriend,
+                          onPressed: searchResultId == null ||
+                              searchResultAvatar == null ||
+                              searchResultUsername == null
+                              ? null
+                              : _addFriend,
                           child: const Text('Add Friend'),
                         ),
                       ],
@@ -214,7 +232,17 @@ class _AddFriendPageState extends State<AddFriendPage> {
                   ),
                 ),
               ] else ...[
-                const Text('No user found with that username.'),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Center(
+                      child: Text(
+                        'No user found with name "${_searchController.text.trim()}"',
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ],
           ],

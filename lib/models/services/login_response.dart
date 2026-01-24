@@ -28,6 +28,9 @@ class LoginResponse {
         if (data.containsKey("friends")) {
           friends = List<Friend>.from(data["friends"].map((x) => Friend.fromJson(x)));
         }
+        if (data.containsKey("groups")) {
+          groups = List<Group>.from(data["groups"].map((x) => Group.fromJson(x)));
+        }
         // TODO: How to do groups? They only give group_versions. How to handle this?
       }
     }

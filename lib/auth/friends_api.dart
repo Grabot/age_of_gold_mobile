@@ -111,8 +111,6 @@ class FriendsApi {
         "${dotenv.env['API_VERSION']}/users",
         data: jsonEncode({'user_ids': userIds}),
       );
-      print("reseponse");
-      print(response.data);
 
       if (response.statusCode == 200) {
         final data = response.data;

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:age_of_gold_mobile/utils/auth_store.dart';
 import 'package:age_of_gold_mobile/views/components/shared_app_bar.dart';
@@ -6,6 +8,8 @@ import 'package:age_of_gold_mobile/utils/utils.dart';
 import 'package:age_of_gold_mobile/views/age_of_gold_home/age_of_gold_home.dart';
 import 'package:age_of_gold_mobile/views/profile/profile_page.dart';
 import 'package:age_of_gold_mobile/views/groups/create_group_page.dart';
+import 'package:age_of_gold_mobile/utils/storage.dart';
+import 'package:age_of_gold_mobile/auth/groups_api.dart';
 
 class GroupsPage extends StatefulWidget {
   const GroupsPage({super.key});
@@ -26,8 +30,25 @@ class _GroupsPageState extends State<GroupsPage> {
     });
   }
 
+  // TODO: Maybe move to a util function? similar to the avatar retrieve in friends page
+  getGroupAvatar(Group group) async {
+    final avatarBytes = await GroupsApi.getGroupAvatar(group.groupId);
+    String avatarPath = await saveNewGroupAvatar(avatarBytes, group.groupId);
+    group.avatarPath = avatarPath;
+    group.avatar = avatarBytes;
+    group.shouldUpdateAvatar = false;
+    await Storage().updateGroup(group);
+  }
+
   Future<void> _loadGroups() async {
-    // TODO: Implement group loading logic (e.g., from API or local storage)
+    for (Group group in authStore.groups) {
+      if ((group.shouldUpdateAvatar != null && group.shouldUpdateAvatar!) || group.avatarPath == null) {
+        await getGroupAvatar(group);
+      }
+      if (group.avatar == null && group.avatarPath != null) {
+        group.avatar = await loadAvatarBytes(group.avatarPath!);
+      }
+    }
     setState(() {});
   }
 
@@ -84,138 +105,97 @@ class _GroupsPageState extends State<GroupsPage> {
   }
 
   Widget _buildGroupsContent() {
-    // TODO: Replace with actual group data from authStore or API
-    final pendingInvites = <Group>[];
-    final yourGroups = <Group>[];
+    final yourGroups = authStore.groups;
 
-    return ListView(
+    return yourGroups.isNotEmpty
+        ? ListView(
       children: [
-        if (pendingInvites.isNotEmpty) ...[
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              'Pending Invites',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFFf39c12),
-              ),
+        const Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Text(
+            'Your Groups',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.blue,
             ),
           ),
-          ...pendingInvites.map((group) => _buildGroupRequestTile(group)),
-        ],
-        if (yourGroups.isNotEmpty) ...[
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              'Your Groups',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.blue,
-              ),
-            ),
-          ),
-          ...yourGroups.map((group) => _buildGroupTile(group)),
-        ],
-        if (pendingInvites.isEmpty && yourGroups.isEmpty) ...[
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.all(32.0),
-              child: Text(
-                'You are not in any groups yet. Create or join a group to get started!',
-                style: TextStyle(fontSize: 16, color: Colors.grey),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ),
-        ],
+        ),
+        ...yourGroups.map((group) => _buildGroupTile(group)),
       ],
+    )
+        : const Center(
+      child: Padding(
+        padding: EdgeInsets.all(32.0),
+        child: Text(
+          'You are not in any groups yet. Create or join a group to get started!',
+          style: TextStyle(fontSize: 16, color: Colors.grey),
+          textAlign: TextAlign.center,
+        ),
+      ),
     );
   }
 
-  Color hexToColour(String hexColour) {
-    final buffer = StringBuffer();
-    if (hexColour.length == 6 || hexColour.length == 7) {
-      buffer.write('ff');
+  String getRandomHexColour() {
+    final random = Random();
+    final hexColour = (random.nextDouble() * 0xFFFFFF).toInt().toRadixString(16).padLeft(6, '0');
+    return '#$hexColour';
+  }
+
+  Color hexToColour(String? hexColour) {
+    hexColour = hexColour?.replaceAll("#", "") ?? getRandomHexColour();
+    if (hexColour.length == 6) {
+      hexColour = "ff$hexColour";
     }
-    return Color(int.parse(buffer.toString(), radix: 16));
-  }
-
-  Widget _buildGroupRequestTile(Group group) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-      decoration: BoxDecoration(
-        color: const Color(0xFFfff9f0),
-        borderRadius: BorderRadius.circular(8),
-        border: Border(left: BorderSide(width: 3, color: Color(0xFFf39c12))),
-      ),
-      child: ListTile(
-        leading: Container(
-          width: 50,
-          height: 50,
-          color: hexToColour(group.groupColour),
-          child: Center(
-            child: Text(
-              group.groupName.isNotEmpty ? group.groupName.substring(0, 1).toUpperCase() : '?',
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ),
-        title: Text(
-          group.groupName,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: const Text('Pending invite', style: TextStyle(color: Color(0xFFf39c12))),
-        onTap: () => _showGroupDetailModal(group),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.check, color: Color(0xFF27ae60)),
-              onPressed: () => _acceptGroupInvite(group),
-            ),
-            IconButton(
-              icon: const Icon(Icons.close, color: Color(0xFFe74c3c)),
-              onPressed: () => _rejectGroupInvite(group),
-            ),
-          ],
-        ),
-      ),
-    );
+    return Color(int.parse(hexColour, radix: 16));
   }
 
   Widget _buildGroupTile(Group group) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: hexToColour(group.groupColour),
         borderRadius: BorderRadius.circular(8),
-        border: Border(left: BorderSide(width: 3, color: Colors.blue)),
+        border: Border.all(color: Colors.grey.shade300, width: 1),
       ),
       child: ListTile(
-        leading: Container(
+        leading: group.avatar != null
+            ? Container(
           width: 50,
           height: 50,
-          color: hexToColour(group.groupColour) ?? getRandomColor(),
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: MemoryImage(group.avatar!),
+              fit: BoxFit.cover,
+            ),
+            borderRadius: BorderRadius.circular(8),
+          ),
+        )
+            : Container(
+          width: 50,
+          height: 50,
+          color: Colors.white.withOpacity(0.9),
           child: Center(
             child: Text(
-              group.groupName.isNotEmpty ? group.groupName.substring(0, 1).toUpperCase() : '?',
+              group.groupName == null || group.groupName!.isEmpty
+                  ? '?'
+                  : group.groupName!.substring(0, 1).toUpperCase(),
               style: const TextStyle(
-                color: Colors.white,
+                color: Colors.black,
                 fontWeight: FontWeight.bold,
               ),
             ),
           ),
         ),
-        title: Text(
-          group.groupName,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+        title: Center(
+          child: Text(
+            group.groupName == null ? "?" : group.groupName!,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
         ),
-        subtitle: const Text('Group', style: TextStyle(color: Colors.blue)),
         onTap: () => _showGroupDetailModal(group),
       ),
     );
@@ -248,7 +228,20 @@ class _GroupsPageState extends State<GroupsPage> {
               Center(
                 child: Column(
                   children: [
-                    Container(
+                    group.avatar != null
+                        ? Container(
+                      width: 100,
+                      height: 100,
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        image: DecorationImage(
+                          image: MemoryImage(group.avatar!),
+                          fit: BoxFit.cover,
+                        ),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    )
+                        : Container(
                       width: 100,
                       height: 100,
                       margin: const EdgeInsets.only(bottom: 16),
@@ -258,7 +251,9 @@ class _GroupsPageState extends State<GroupsPage> {
                       ),
                       child: Center(
                         child: Text(
-                          group.groupName.isNotEmpty ? group.groupName.substring(0, 1).toUpperCase() : '?',
+                          group.groupName == null || group.groupName!.isEmpty
+                              ? '?'
+                              : group.groupName!.substring(0, 1).toUpperCase(),
                           style: const TextStyle(
                             color: Colors.white,
                             fontSize: 40,
@@ -268,7 +263,7 @@ class _GroupsPageState extends State<GroupsPage> {
                       ),
                     ),
                     Text(
-                      group.groupName,
+                      group.groupName == null ? "?" : group.groupName!,
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
@@ -279,6 +274,7 @@ class _GroupsPageState extends State<GroupsPage> {
                       Text(
                         group.groupDescription!,
                         style: const TextStyle(fontSize: 16),
+                        textAlign: TextAlign.center,
                       ),
                   ],
                 ),
@@ -293,7 +289,6 @@ class _GroupsPageState extends State<GroupsPage> {
   }
 
   Widget _buildGroupActionButtons(Group group) {
-    // TODO: Implement group-specific actions (e.g., leave group, view members)
     return ElevatedButton(
       onPressed: () => _leaveGroup(group),
       style: ElevatedButton.styleFrom(
@@ -306,21 +301,19 @@ class _GroupsPageState extends State<GroupsPage> {
     );
   }
 
-  void _acceptGroupInvite(Group group) {
-    // TODO: Implement logic to accept group invite
-    showToastMessage('Group invite accepted!');
-    setState(() {});
-  }
-
-  void _rejectGroupInvite(Group group) {
-    // TODO: Implement logic to reject group invite
-    showToastMessage('Group invite rejected');
-    setState(() {});
-  }
-
-  void _leaveGroup(Group group) {
-    // TODO: Implement logic to leave group
-    showToastMessage('Left the group');
-    setState(() {});
+  Future<void> _leaveGroup(Group group) async {
+    try {
+      final response = await GroupsApi.leaveGroup(group.groupId);
+      if (response.success == true) {
+        authStore.groups.removeWhere((g) => g.groupId == group.groupId);
+        await Storage().deleteGroup(group.groupId);
+        showToastMessage('Left the group');
+        setState(() {});
+      } else {
+        showToastMessage('Failed to leave group');
+      }
+    } catch (e) {
+      showToastMessage('Failed to leave group: ${e.toString()}');
+    }
   }
 }

@@ -2,9 +2,11 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:age_of_gold_mobile/auth/auth_api.dart';
+import 'package:age_of_gold_mobile/models/services/basic_response.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+import '../models/services/avatar_version_response.dart';
 import '../models/services/user_response.dart';
 
 class UserApi {
@@ -37,6 +39,26 @@ class UserApi {
       throw Exception(e.message);
     }
   }
+
+  static Future<int> getAvatarVersion(int userId) async {
+    try {
+      final response = await _dio.post(
+        "${dotenv.env['API_VERSION']}/user/avatar/version",
+        options: Options(
+          headers: {HttpHeaders.contentTypeHeader: "application/json"},
+        ),
+        data: jsonEncode({'user_id': userId}),
+      );
+      final avatarVersionResponse = AvatarVersionResponse.fromJson(response.data);
+      if (avatarVersionResponse.success == null || avatarVersionResponse.success! == false || avatarVersionResponse.avatarVersion == null) {
+        throw Exception("Couldn't get avatar version details");
+      }
+      return avatarVersionResponse.avatarVersion!;
+    } on DioException catch (e) {
+      throw Exception(e.message);
+    }
+  }
+
 
   static Future<UserResponse> getUser(int? userId) async {
     final Map<String, dynamic> data = {};

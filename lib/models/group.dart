@@ -5,7 +5,8 @@ import 'dart:typed_data';
 class Group {
   final int groupId;
   final int groupVersion;
-  bool shouldUpdateAvatar = false;
+  // TODO: Only groupId and groupVersion required.
+  bool? shouldUpdateAvatar;
   int? unreadMessages;
   bool? mute;
   String? muteTimestamp;
@@ -14,10 +15,10 @@ class Group {
   int? lastMessageReadId;
   List<int>? userIds;
   List<int>? adminIds;
-  String groupName;
+  String? groupName;
   bool? private;
   String? groupDescription;
-  String groupColour;
+  String? groupColour;
   int? currentMessageId;
   Uint8List? avatar;
   String? avatarPath;
@@ -35,13 +36,13 @@ class Group {
     this.lastMessageReadId,
     this.userIds,
     this.adminIds,
-    this.groupName = "",
+    this.groupName,
     this.private,
     this.groupDescription,
-    this.groupColour = "",
+    this.groupColour,
     this.currentMessageId,
     this.avatarPath,
-    this.shouldUpdateAvatar = false,
+    this.shouldUpdateAvatar,
   });
 
   // TODO: Only required?
@@ -49,19 +50,6 @@ class Group {
     return Group(
       groupId: json['group_id'] as int,
       groupVersion: json['group_version'] as int,
-      unreadMessages: json['unread_messages'] as int,
-      mute: json['mute'] as bool?,
-      muteTimestamp: json['mute_timestamp'] as String?,
-      messageVersion: json['message_version'] as int?,
-      avatarVersion: json['avatar_version'] as int?,
-      lastMessageReadId: json['last_message_read_id'] as int?,
-      userIds: json['user_ids'].cast<int>(),
-      adminIds: json['admin_ids'].cast<int>(),
-      groupName: json['group_name'] as String,
-      private: json['private'] as bool?,
-      groupDescription: json['group_description'] as String?,
-      groupColour: json['group_colour'] as String,
-      currentMessageId: json['current_message_id'] as int?,
     );
   }
 
@@ -104,10 +92,11 @@ class Group {
       'groupColour': groupColour,
       'currentMessageId': currentMessageId,
       'avatarPath': avatarPath,
-      'shouldUpdateAvatar': shouldUpdateAvatar ? 1 : 0,
+      'shouldUpdateAvatar': shouldUpdateAvatar != null ? (shouldUpdateAvatar! ? 1 : 0) : null,
     };
   }
 
+  // TODO: This is from when you retrieve the full data as opposed to the minimal data with the fromJson function. Maybe improve naming so this is more clear?
   factory Group.fromMap(Map<String, dynamic> map) {
     return Group(
       groupId: map['group_id'] as int,
@@ -118,14 +107,14 @@ class Group {
       messageVersion: map['message_version'] != null ? (map['message_version'] as int) : null,
       avatarVersion: map['avatar_version'] != null ? (map['avatar_version'] as int) : null,
       lastMessageReadId: map['last_message_read_id'] != null ? (map['last_message_read_id'] as int) : null,
-      userIds: map['user_ids'] != null ? (map['user_ids'] as List<int>) : null,
-      adminIds: map['admin_ids'] != null ? (map['admin_ids'] as List<int>) : null,
-      groupName: map['group_name'] as String,
+      userIds: map['user_ids'] != null ? (map['user_ids'].cast<int>() as List<int>) : null,
+      adminIds: map['admin_ids'] != null ? (map['admin_ids'].cast<int>() as List<int>) : null,
+      groupName: map['group_name'] != null ? (map['group_name'] as String) : null,
       private: map['private'] != null ? (map['private'] as bool) : null,
       groupDescription: map['group_description'] != null ? (map['group_description'] as String) : null,
-      groupColour: map['group_colour'] as String,
+      groupColour:  map['group_colour'] != null ? (map['group_colour'] as String) : null,
       currentMessageId: map['current_message_id'] != null ? (map['current_message_id'] as int) : null,
-      shouldUpdateAvatar: map['shouldUpdateAvatar'] == 1,
+      shouldUpdateAvatar: map['shouldUpdateAvatar'] != null ? (map['shouldUpdateAvatar'] == 1) : null,
     );
   }
 
